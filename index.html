@@ -360,7 +360,7 @@
       <div class="err" id="loginErr"></div>
       <div class="btnrow"><button class="btn" id="loginBtn" data-t="loginBtn" style="width:100%;justify-content:center">Sign in</button></div>
       <div class="banner warn" style="margin:16px 0 0">
-        <span>○</span><div><span data-t="demoHint">Demo: </span><span class="mono">admin·0000 / coach1·1111 / RIF01·2222</span></div></div>
+        <span>○</span><div><span data-t="demoHint">Demo: </span><span class="mono">Athlete RIF01·2222 · Coach coach1·1111</span></div></div>
     </div>
   </div>
 
@@ -521,7 +521,11 @@ const FIREBASE_CONFIG = {
   appId: "1:179902352786:web:adf38571cecc765263054b",
   measurementId: "G-PHV9DK1JNM"
 };
-const CONFIGURED = !FIREBASE_CONFIG.apiKey.startsWith("PASTE_");
+/* DEMO BUILD: forced offline so this showcase never writes to the live
+   database. Everything runs on in-browser demo data. To make this a live
+   copy again, delete the next line. */
+const DEMO_MODE = true;
+const CONFIGURED = !DEMO_MODE && !FIREBASE_CONFIG.apiKey.startsWith("PASTE_");
 
 /* ╔═══════════════════════════════════════════════════╗
    ║  YOUR CONTACT DETAILS — edit these                 ║
@@ -757,9 +761,31 @@ async function ensureSeed(){
   if(await DB.getUser("admin"))return;
   await DB.setUser("admin",{name:"Ahmad Hishamudin",role:"admin",pass:"0000",discipline:""});
   await DB.setUser("coach1",{name:"Head Coach",role:"coach",pass:"1111",discipline:""});
-  await DB.setUser("RIF01",{name:"Aiman",role:"athlete",pass:"2222",discipline:"rifle"});
+  await DB.setUser("RIF01",{name:"Aiman",role:"athlete",pass:"2222",discipline:"rifle",
+    gameplan:{routine:"Feet set \u2192 grip \u2192 breathe out \u2192 sight picture \u2192 hold \u2192 squeeze",
+      cue:"Smooth",reset:"Lower rifle, one long breath, say my cue, next shot is new",
+      why:"For my family, and to prove I belong at this level.",updatedAt:new Date().toISOString()}});
   await DB.setUser("PIS01",{name:"Nadia",role:"athlete",pass:"3333",discipline:"pistol"});
   await DB.setUser("SHO01",{name:"Hafiz",role:"athlete",pass:"4444",discipline:"shotgun"});
+  await seedDemoAthlete();
+}
+/* Populate the showcase athlete (Aiman/RIF01) with a full 10-day history +
+   game scores, so a demo opens ready to show athlete & coach views. */
+async function seedDemoAthlete(){
+  const arc=demoArc();
+  // game scores keyed by the arc's "off" (days ago) — realistic practice pattern
+  const gsByOff={10:{breath:100,grid:210},9:{stroop:280},8:{breath:75,reset:190},
+    7:{},6:{breath:100},5:{grid:170,breath:75},4:{stroop:342,grid:250},
+    3:{reset:220},2:{breath:125,stroop:300},1:{grid:370,breath:100,seq:80}};
+  for(const r of arc){
+    const dt=new Date();dt.setDate(dt.getDate()-r.off);const key=dt.toISOString().slice(0,10);
+    const payload={brums:r.b,brumsAt:dt.toISOString(),diary:{...r.d,at:dt.toISOString()}};
+    const gs=gsByOff[r.off];
+    if(gs&&Object.keys(gs).length)payload.games=gs;
+    await DB.setDay("RIF01",key,payload);
+  }
+  await DB.addNote("RIF01",{text:"Strong recovery after the mid-block fatigue dip. Watch reset speed under sim-final pressure.",
+    by:"Head Coach",at:new Date().toISOString(),private:false});
 }
 
 /* ---------- lang/tabs ---------- */
@@ -1679,7 +1705,7 @@ document.getElementById("loadDemoSelf").addEventListener("click",loadDemoSelf);
 document.getElementById("sortRoster").addEventListener("change",renderRoster);
 document.getElementById("newAccountBtn").addEventListener("click",openNewAccount);
 
-async function init(){if(CONFIGURED)document.getElementById("configBanner").classList.add("hidden");await ensureSeed();applyLang();}
+async function init(){if(CONFIGURED||DEMO_MODE)document.getElementById("configBanner").classList.add("hidden");await ensureSeed();applyLang();}
 init();
 </script>
 </body>
