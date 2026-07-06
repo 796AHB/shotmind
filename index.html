@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#F4F7FB">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ShotMind">
+<title>ShotMind — Shooting Readiness System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F4F7FB;            /* page — soft light */
+    --bg2:#FFFFFF;           /* raised panel / card */
+    --bg3:#EDF2F9;           /* inset tile */
+    --line:#DCE4EF;
+    --line2:#C3CFDF;
+    --glass:#0FA396;         /* teal primary (deep enough for white bg) */
+    --glass-dim:#0B7F75;
+    --brass:#C8871E;         /* gold, darkened for contrast */
+    --amber:#D97706;
+    --red:#DC2626;
+    --bad:#DC2626;
+    --green:#189A55;
+    --ink:#14233C;           /* navy primary text */
+    --ink2:#44566F;          /* secondary */
+    --ink3:#77879D;          /* muted */
+    --focus:#0FA396;
+    --onglass:#FFFFFF;       /* text on teal fills */
+    --r:14px;
+    --shadow:0 1px 2px rgba(20,35,60,.05), 0 10px 26px rgba(20,35,60,.09);
+  }
+  html[data-theme="dark"]{
+    --bg:#141C2C; --bg2:#1E2838; --bg3:#28344A;
+    --line:#3A4C6B; --line2:#51668C;
+    --glass:#57ECD9; --glass-dim:#33B0A2;
+    --brass:#FFCB5C; --amber:#FFBE5A;
+    --red:#FF7563; --bad:#FF7563; --green:#63E89A;
+    --ink:#F7FBFF; --ink2:#C9D6E6; --ink3:#93A4BC;
+    --focus:#9CF6E9; --onglass:#06231F;
+    --shadow:0 1px 0 rgba(255,255,255,.04) inset, 0 10px 30px rgba(0,0,0,.4);
+  }
+  html[data-theme="dark"] body{
+    background:
+      radial-gradient(1200px 560px at 50% -12%, rgba(87,236,217,.14), transparent 62%),
+      radial-gradient(900px 460px at 88% 112%, rgba(255,203,92,.08), transparent 60%),
+      var(--bg);
+  }
+  .themebtn{width:34px;height:34px;border-radius:10px;border:1px solid var(--line2);background:var(--bg2);
+    color:var(--ink2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;flex:0 0 auto}
+  .themebtn:hover{border-color:var(--glass);color:var(--glass)}
+  .themebtn svg{width:17px;height:17px}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(1200px 560px at 50% -12%, rgba(15,163,150,.09), transparent 62%),
+      radial-gradient(900px 460px at 88% 112%, rgba(200,135,30,.06), transparent 60%),
+      var(--bg);
+    color:var(--ink);font-family:"Inter",system-ui,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:20px 18px 100px}
+  .hidden{display:none!important}
+  .mono{font-family:"JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
+  .display{font-family:"Oswald",sans-serif;letter-spacing:.02em}
+
+  /* ---------- top bar ---------- */
+  header.top{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+    padding:6px 0 16px;border-bottom:1px solid var(--line);margin-bottom:20px}
+  .brand{display:flex;align-items:center;gap:13px}
+  .scope{width:42px;height:42px;flex:0 0 auto;position:relative}
+  .scope svg{display:block}
+  h1{font-family:"Oswald";font-weight:600;font-size:22px;letter-spacing:.06em;margin:0;text-transform:uppercase}
+  h1 .sub{display:block;font-family:"Inter";font-size:9.5px;font-weight:600;letter-spacing:.28em;color:var(--ink3);text-transform:uppercase;margin-top:1px}
+  .topright{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .langs{display:flex;border:1px solid var(--line2);border-radius:30px;overflow:hidden}
+  .langs button{font:inherit;font-size:12px;font-weight:600;padding:6px 13px;border:0;background:transparent;color:var(--ink2);cursor:pointer}
+  .langs button.on{background:var(--glass);color:var(--onglass)}
+  .whoami{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--ink2)}
+  .whoami .nm{font-weight:600;color:var(--ink)}
+  .rolebadge{font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:4px 9px;border-radius:20px}
+  .r-athlete{background:rgba(15,163,150,.16);color:var(--glass);border:1px solid rgba(15,163,150,.4)}
+  .r-coach{background:rgba(232,160,61,.16);color:var(--amber);border:1px solid rgba(232,160,61,.4)}
+  .r-admin{background:rgba(95,184,122,.16);color:var(--green);border:1px solid rgba(95,184,122,.4)}
+
+  .btn{font:inherit;font-weight:600;font-size:14px;padding:11px 18px;border:0;border-radius:10px;cursor:pointer;
+    background:var(--glass);color:var(--onglass);transition:.15s;letter-spacing:.01em}
+  .btn:hover{background:#56c9bb;transform:translateY(-1px)}
+  .btn:active{transform:translateY(0)}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line2)}
+  .btn.ghost:hover{background:var(--bg2);border-color:var(--glass);transform:none}
+  .btn.sm{padding:7px 13px;font-size:12.5px;border-radius:8px}
+  .btn.danger{background:transparent;color:var(--red);border:1px solid rgba(226,86,63,.5)}
+  .btn.danger:hover{background:rgba(226,86,63,.12);transform:none}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+  .btnrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  :focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:4px}
+
+  .card{background:linear-gradient(180deg,var(--bg3),var(--bg2));border:1px solid var(--line);border-radius:var(--r);
+    padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+  .card h2{margin:0 0 4px;font-family:"Oswald";font-weight:500;font-size:17px;letter-spacing:.05em;text-transform:uppercase}
+  .lead{margin:0 0 16px;font-size:13px;color:var(--ink2)}
+  .eyebrow{font-size:10px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--glass);margin:0 0 6px}
+
+  .banner{font-size:12.5px;border-radius:10px;padding:11px 14px;margin-bottom:16px;border:1px solid;display:flex;gap:8px;align-items:flex-start}
+  .banner.config{background:rgba(220,38,38,.07);border-color:rgba(220,38,38,.3);color:#A02020}
+  .banner.warn{background:rgba(217,119,6,.08);border-color:rgba(217,119,6,.35);color:#92600A}
+
+  /* ---------- login ---------- */
+  .login-wrap{max-width:400px;margin:7vh auto 0}
+  .field{margin-bottom:15px}
+  label.q{display:block;font-size:12px;font-weight:600;margin-bottom:7px;color:var(--ink2);letter-spacing:.02em}
+  label.q .help{font-weight:400;color:var(--ink3)}
+  input[type=text],input[type=password],input[type=number],select,textarea{
+    width:100%;font:inherit;font-size:14px;padding:12px 13px;border:1px solid var(--line2);border-radius:10px;
+    background:var(--bg);color:var(--ink);resize:vertical}
+  input::placeholder,textarea::placeholder{color:var(--ink3)}
+  input:focus,select:focus,textarea:focus{outline:0;border-color:var(--glass);box-shadow:0 0 0 3px rgba(15,163,150,.15)}
+  .pininput{font-family:"JetBrains Mono";letter-spacing:.5em;text-align:center;font-size:20px;font-weight:700}
+  .err{color:var(--red);font-size:12.5px;font-weight:600;margin-top:8px;min-height:16px}
+
+  /* ---------- tabs ---------- */
+  .tabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap}
+  .tabs button{font:inherit;font-weight:600;font-size:13px;padding:9px 16px;border:1px solid var(--line);
+    background:var(--bg2);color:var(--ink2);cursor:pointer;border-radius:30px;transition:.15s;display:flex;flex-direction:column;align-items:center;gap:1px}
+  .tabs button .tag{font-size:8.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
+  .tabs button.on{background:var(--glass);color:var(--onglass);border-color:var(--glass)}
+  .tabs button.on .tag{color:rgba(4,17,15,.65)}
+  .panel{display:none} .panel.on{display:block}
+  @media(prefers-reduced-motion:no-preference){.panel.on{animation:fade .3s ease}}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* ---------- BRUMS ---------- */
+  .brums-item{display:grid;grid-template-columns:1fr auto;gap:8px 16px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+  .brums-item:last-child{border-bottom:0}
+  .brums-word{font-size:14px;font-weight:500}
+  .brums-word .n{font-family:"JetBrains Mono";font-size:11px;color:var(--ink3);margin-right:8px}
+  .scale{display:flex;gap:6px}
+  .scale label{position:relative;cursor:pointer}
+  .scale input{position:absolute;opacity:0;width:0;height:0}
+  .scale span{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border:1px solid var(--line2);
+    border-radius:9px;font-family:"JetBrains Mono";font-size:13px;font-weight:500;color:var(--ink3);background:var(--bg);transition:.12s}
+  .scale input:checked + span{background:var(--glass);color:var(--onglass);border-color:var(--glass)}
+  .scale label:hover span{border-color:var(--glass)}
+  .scale input:focus-visible + span{outline:2px solid var(--focus);outline-offset:2px}
+  .scalehint{display:flex;justify-content:space-between;font-size:10px;color:var(--ink3);letter-spacing:.08em;
+    text-transform:uppercase;margin:4px 2px 16px;border-top:1px solid var(--line);padding-top:8px}
+
+  /* ---------- readiness reticle (signature) ---------- */
+  .readout{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+  .reticle{width:200px;height:200px;flex:0 0 auto;position:relative}
+  .reticle .score{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .reticle .score .num{font-family:"Oswald";font-weight:700;font-size:50px;line-height:1;letter-spacing:.01em}
+  .reticle .score .lbl{font-size:9px;font-weight:700;letter-spacing:.26em;text-transform:uppercase;color:var(--ink3);margin-top:3px}
+  .readout .meta{flex:1;min-width:200px}
+  .profile-tag{display:inline-block;font-family:"Oswald";font-size:14px;font-weight:600;letter-spacing:.06em;
+    text-transform:uppercase;padding:6px 14px;border-radius:8px;margin-bottom:10px}
+  .subscores{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+  .subscore{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px 9px}
+  .subscore .k{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
+  .subscore .v{font-family:"JetBrains Mono";font-size:16px;font-weight:500;margin-top:2px}
+  .subscore .bar{height:3px;border-radius:2px;margin-top:5px;background:var(--line2);position:relative;overflow:hidden}
+  .subscore .bar i{position:absolute;left:0;top:0;bottom:0;border-radius:2px}
+
+  /* plan checklist */
+  .analysis .block{margin-bottom:16px}
+  .analysis h4{margin:0 0 8px;font-size:11px;letter-spacing:.16em;text-transform:uppercase;display:flex;align-items:center;gap:7px}
+  .analysis h4::before{content:"";width:7px;height:7px;border-radius:50%;flex:0 0 auto}
+  .analysis .carry h4::before{background:var(--glass)} .analysis .pros h4::before{background:var(--green)}
+  .analysis .cons h4::before{background:var(--red)} .analysis .plan h4::before{background:var(--brass)}
+  .analysis .carry h4{color:var(--glass)} .analysis .pros h4{color:var(--green)}
+  .analysis .cons h4{color:var(--red)} .analysis .plan h4{color:var(--brass)}
+  .analysis ul{margin:0;padding:0;list-style:none}
+  .analysis li{font-size:13.5px;margin-bottom:7px;padding-left:20px;position:relative}
+  .analysis li::before{content:"›";position:absolute;left:4px;color:var(--ink3);font-weight:700}
+  .checkitem{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;margin-bottom:9px;cursor:pointer}
+  .checkitem input{margin-top:3px;accent-color:var(--glass);width:16px;height:16px;flex:0 0 auto}
+  .checkitem.done span{color:var(--ink3);text-decoration:line-through}
+  .none{font-size:13px;color:var(--ink3);font-style:italic}
+
+  /* sliders + chips */
+  .sliderow{display:flex;align-items:center;gap:14px}
+  input[type=range]{flex:1;accent-color:var(--glass)}
+  .sliderow .val{width:38px;text-align:center;font-family:"JetBrains Mono";font-weight:700;font-size:16px;color:var(--glass)}
+  .chips{display:flex;gap:7px;flex-wrap:wrap}
+  .chips label{cursor:pointer}.chips input{position:absolute;opacity:0}
+  .chips span{display:inline-block;font-size:12.5px;font-weight:500;padding:8px 14px;border:1px solid var(--line2);border-radius:30px;background:var(--bg);transition:.12s}
+  .chips input:checked + span{background:var(--glass);color:var(--onglass);border-color:var(--glass)}
+  .chips input:focus-visible + span{outline:2px solid var(--focus);outline-offset:2px}
+
+  /* streak */
+  .streak{display:flex;align-items:center;gap:14px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:13px 16px;margin-bottom:16px}
+  .streak .flame{font-size:26px;line-height:1}
+  .streak .big{font-family:"Oswald";font-weight:700;font-size:26px;line-height:1}
+  .streak .txt{font-size:12px;color:var(--ink2)}
+  .streak .dots{display:flex;gap:4px;margin-left:auto}
+  .streak .dots i{width:10px;height:10px;border-radius:3px;background:var(--line2);display:block}
+  .streak .dots i.hit{background:var(--glass)}
+
+  /* tables */
+  .trendwrap{overflow-x:auto;border-radius:10px;border:1px solid var(--line)}
+  table.hist{border-collapse:collapse;width:100%;font-size:12.5px;min-width:640px}
+  table.hist th,table.hist td{padding:9px 11px;text-align:center;border-bottom:1px solid var(--line)}
+  table.hist th{background:var(--bg2);color:var(--ink2);font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+  table.hist td{font-family:"JetBrains Mono";font-size:12px}
+  table.hist td.day{font-family:"Inter";font-weight:600;color:var(--ink);text-align:left}
+  table.hist tr:last-child td{border-bottom:0}
+  table.hist tbody tr:hover td{background:var(--bg2)}
+
+  /* sparkline */
+  .spark{display:block;width:100%;height:46px;margin:2px 0 14px}
+
+  /* roster */
+  .rostertools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+  .rostertools select{width:auto;padding:8px 12px}
+  .roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:13px}
+  .athlete-card{border:1px solid var(--line);border-radius:12px;padding:15px;background:linear-gradient(180deg,var(--bg3),var(--bg2));cursor:pointer;transition:.15s;text-align:left;width:100%;font:inherit;color:inherit;display:block}
+  .athlete-card:hover{border-color:var(--glass);transform:translateY(-2px)}
+  .athlete-card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+  .athlete-card .nm{font-weight:600;font-size:15px}
+  .athlete-card .disc{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-top:2px;font-family:"JetBrains Mono"}
+  .ring{width:46px;height:46px;flex:0 0 auto}
+  .athlete-card .foot{display:flex;align-items:center;justify-content:space-between;margin-top:13px;font-size:11px;color:var(--ink2)}
+  .stale{color:var(--amber);font-weight:600}
+  .fresh{color:var(--ink3)}
+
+  /* notes */
+  .note{border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:10px;background:var(--bg)}
+  .note .nh{font-size:11px;color:var(--ink3);margin-bottom:5px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+  .note .by{font-weight:700;color:var(--glass)}
+  .note .priv{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);border:1px solid rgba(232,160,61,.4);padding:2px 6px;border-radius:5px}
+  .note .body{font-size:13.5px}
+
+  .empty{font-size:13px;color:var(--ink3);padding:26px;text-align:center;border:1px dashed var(--line2);border-radius:12px}
+  .empty b{color:var(--ink2);display:block;font-size:14px;margin-bottom:4px;font-family:"Oswald";letter-spacing:.04em}
+
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--bg3);color:var(--ink);
+    padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:.3s;z-index:60;
+    box-shadow:0 14px 34px rgba(20,35,60,.18);border:1px solid var(--line2)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .modal{position:fixed;inset:0;background:rgba(20,35,60,.45);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50;backdrop-filter:blur(3px)}
+  .modal .box{background:linear-gradient(180deg,var(--bg3),var(--bg2));border:1px solid var(--line2);border-radius:16px;padding:24px;max-width:480px;width:100%;max-height:90vh;overflow:auto;box-shadow:var(--shadow)}
+  .spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--line2);border-top-color:var(--glass);border-radius:50%;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @media(prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+  footer{margin-top:32px;border-top:1px solid var(--line);padding-top:14px;font-size:11px;color:var(--ink3);text-align:center;font-family:"JetBrains Mono"}
+  /* mind games */
+  .gamesgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+  .gametile{border:1px solid var(--line);border-radius:12px;padding:16px 14px;background:linear-gradient(180deg,var(--bg3),var(--bg2));cursor:pointer;transition:.15s;text-align:left;width:100%;color:inherit;font:inherit;display:flex;flex-direction:column;gap:8px}
+  .gametile:hover{border-color:var(--glass);transform:translateY(-2px)}
+  .gametile .gi{font-size:26px;line-height:1}
+  .gametile .gn{font-weight:700;font-size:14px}
+  .gametile .gd{font-size:11px;color:var(--ink3);line-height:1.3}
+  .gametile .gbest{font-size:10px;font-family:"JetBrains Mono";color:var(--glass);margin-top:auto}
+  .gamebox{background:linear-gradient(180deg,var(--bg3),var(--bg2));border:1px solid var(--line2);border-radius:14px;padding:20px;margin-top:16px;text-align:center}
+  .gamebox h3{font-family:"Oswald";font-size:20px;margin:0 0 4px;letter-spacing:.04em}
+  .gamebox .gsub{font-size:12.5px;color:var(--ink2);margin-bottom:16px}
+  .gamearea{position:relative;height:300px;border-radius:12px;background:var(--bg);border:1px solid var(--line);overflow:hidden;display:flex;align-items:center;justify-content:center;margin-bottom:14px;user-select:none;touch-action:manipulation}
+  .breathorb{border-radius:50%;background:radial-gradient(circle at 40% 35%,#7FF2E2,#2E9B8E);box-shadow:0 8px 30px rgba(15,163,150,.35);display:flex;align-items:center;justify-content:center;color:var(--onglass);font-weight:800;font-size:19px;transition:transform .1s linear}
+  .qetarget{width:60px;height:60px;border-radius:50%;position:absolute;background:radial-gradient(circle,var(--glass) 0 30%,transparent 32%),radial-gradient(circle,transparent 0 44%,var(--glass) 45% 50%,transparent 52%);cursor:pointer}
+  .qering{position:absolute;border:3px solid var(--glass);border-radius:50%;pointer-events:none}
+  .rtDot{width:70px;height:70px;border-radius:50%;position:absolute;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--onglass)}
+  .seqcell{border-radius:12px;border:1px solid var(--line2);background:var(--bg2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.1s;aspect-ratio:1}
+  .seqcell.lit{background:var(--glass);transform:scale(.96)}
+  .seqgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:280px;margin:0 auto 14px}
+  /* concentration grid */
+  .cgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;max-width:330px;margin:0 auto 14px}
+  .cgcell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border:1px solid var(--line2);border-radius:9px;
+    background:var(--bg2);cursor:pointer;font-family:"JetBrains Mono";font-weight:700;font-size:15px;color:var(--ink);user-select:none;transition:.12s}
+  .cgcell.done{background:var(--glass);color:var(--onglass);border-color:var(--glass)}
+  .cgcell.err{background:var(--bad);color:#fff;border-color:var(--bad)}
+  /* stroop */
+  .stroopbtns{display:flex;gap:14px;justify-content:center;margin-bottom:14px}
+  .stroopbtn{width:54px;height:54px;border-radius:50%;border:2.5px solid var(--line2);cursor:pointer;transition:.12s}
+  .stroopbtn:active{transform:scale(.92)}
+  .gbig{font-family:"Oswald";font-size:44px;font-weight:700;color:var(--glass)}
+  .gmsg{font-size:14px;color:var(--ink);min-height:22px;margin-bottom:10px}
+  .gresult{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:12px}
+  .gresult .gscore{font-family:"Oswald";font-size:36px;font-weight:700}
+  /* contact */
+  .contactrow{display:flex;gap:14px;align-items:center;padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--bg);margin-bottom:14px}
+  .contactrow .ci{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;flex:0 0 auto}
+  .wa{background:#25D36622;border:1px solid #25D36688}
+  .btn.wa{background:#25D366;color:#fff}.btn.wa:hover{background:#20c05d}
+  @media(max-width:560px){
+    .brums-item{grid-template-columns:1fr}.scale{justify-content:space-between}.scale span{width:44px;height:44px;font-size:16px}
+    .readout{justify-content:center}.subscores{grid-template-columns:repeat(3,1fr)}
+  }
+  /* icons hidden on desktop; shown by the mobile query below (order matters) */
+  .tabs button .ticon{display:none}
+  /* squad overview chips */
+  .ovchip{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;text-align:center;box-shadow:var(--shadow)}
+  .ovchip .ovl{font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.07em;font-weight:700}
+  .ovchip .ovv{font-family:"Oswald";font-size:24px;font-weight:700;color:var(--ink);margin-top:2px}
+  /* ---- mobile bottom nav ---- */
+  @media(max-width:700px){
+    .wrap{padding-bottom:110px}
+    .tabs{position:fixed;left:0;right:0;bottom:0;z-index:40;margin:0;gap:4px;padding:8px 8px calc(10px + env(safe-area-inset-bottom));
+      background:rgba(255,255,255,.94);backdrop-filter:blur(14px);
+      border-top:1px solid rgba(15,163,150,.35);box-shadow:0 -8px 24px rgba(20,35,60,.12);flex-wrap:nowrap;overflow-x:auto}
+    .tabs button{flex:1;min-width:0;border-radius:14px;border:0;background:transparent;padding:9px 2px}
+    .tabs button .tag,.tabs button .tlabel{display:none}
+    .tabs button .ticon{display:block!important;color:#77879D;transition:.18s;margin:0 auto;width:24px;height:24px}
+    .tabs button .ticon svg{width:24px;height:24px;display:block}
+    .tabs button.on{background:rgba(15,163,150,.14);
+      box-shadow:0 0 0 1.5px rgba(15,163,150,.6) inset,0 4px 14px rgba(15,163,150,.25)}
+    .tabs button.on .ticon{color:#0FA396;filter:none;transform:translateY(-2px) scale(1.12)}
+    html[data-theme="dark"] .tabs{background:rgba(24,32,46,.96);border-top-color:rgba(87,236,217,.4);box-shadow:0 -8px 24px rgba(0,0,0,.5)}
+    html[data-theme="dark"] .tabs button .ticon{color:#8698B0}
+    html[data-theme="dark"] .tabs button.on{background:rgba(87,236,217,.18);box-shadow:0 0 0 1.5px rgba(87,236,217,.7) inset,0 0 18px rgba(87,236,217,.35)}
+    html[data-theme="dark"] .tabs button.on .ticon{color:#57ECD9;filter:drop-shadow(0 0 6px rgba(87,236,217,.6))}
+    footer{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="scope" aria-hidden="true">
+        <svg width="42" height="42" viewBox="0 0 42 42" fill="none">
+          <circle cx="21" cy="21" r="19" stroke="#0FA396" stroke-width="1.5"/>
+          <circle cx="21" cy="21" r="12" stroke="#0FA396" stroke-width="1" opacity=".6"/>
+          <circle cx="21" cy="21" r="2.4" fill="#FFC24B"/>
+          <path d="M21 1v9M21 32v9M1 21h9M32 21h9" stroke="#0FA396" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <h1>ShotMind<span class="sub" data-t="appSub">Shooting Readiness System</span></h1>
+    </div>
+    <div class="topright">
+      <div class="langs" id="langs">
+        <button data-lang="en" class="on">EN</button>
+        <button data-lang="ko">한국어</button>
+      </div>
+      <button class="themebtn" id="themeToggle" aria-label="Theme"></button>
+      <div class="whoami hidden" id="whoami"></div>
+      <button class="btn ghost sm hidden" id="logoutBtn" data-t="logout">Log out</button>
+    </div>
+  </header>
+
+  <div class="banner config" id="configBanner">
+    <span>⚠</span><div><b data-t="cfgTitle">Firebase not connected.</b>
+    <span data-t="cfgBody"> Paste your project config into the FIREBASE_CONFIG block at the top of the script and reload. Until then ShotMind runs on demo data stored only in this browser.</span></div>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="loginView" class="login-wrap">
+    <div class="card">
+      <p class="eyebrow" data-t="signIn">Sign in</p>
+      <h2 data-t="loginTitle">Enter your access</h2>
+      <p class="lead" data-t="loginLead">Use the User ID and passcode your sport psychologist issued you.</p>
+      <div class="field"><label class="q" data-t="userId">User ID</label>
+        <input type="text" id="loginUser" autocomplete="username" placeholder="RIF01"></div>
+      <div class="field"><label class="q" data-t="passcode">Passcode</label>
+        <input type="password" id="loginPass" class="pininput" inputmode="numeric" autocomplete="current-password" placeholder="••••"></div>
+      <div class="err" id="loginErr"></div>
+      <div class="btnrow"><button class="btn" id="loginBtn" data-t="loginBtn" style="width:100%;justify-content:center">Sign in</button></div>
+      <div class="banner warn" style="margin:16px 0 0">
+        <span>○</span><div><span data-t="demoHint">Demo: </span><span class="mono">admin·0000 / coach1·1111 / RIF01·2222</span></div></div>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="appView" class="hidden">
+    <div class="tabs" id="tabs"></div>
+
+    <!-- before -->
+    <section class="panel" id="panel-before">
+      <div class="card" id="streakCard"></div>
+      <div class="card">
+        <p class="eyebrow" data-t="ebBefore">Before training · BRUMS</p>
+        <h2 data-t="brumsTitle">Mood check</h2>
+        <p class="lead" data-t="brumsLead">Rate how you feel right now. Fast and honest — this sets today's plan.</p>
+        <div class="banner warn hidden" id="alreadyBrums"><span>○</span><div data-t="brumsDone">Logged today already. Submitting again overwrites it.</div></div>
+        <div id="brumsList"></div>
+        <div class="scalehint"><span data-t="anchor0">0 — not at all</span><span data-t="anchor4">4 — extremely</span></div>
+        <div class="btnrow"><button class="btn" id="submitBrums" data-t="getPlan">Read today's plan</button>
+          <button class="btn ghost" id="clearBrums" data-t="clearBtn">Clear</button></div>
+      </div>
+      <div class="card hidden" id="brumsResult">
+        <p class="eyebrow" data-t="ebResult">Readiness</p>
+        <div class="readout">
+          <div class="reticle" id="reticle"></div>
+          <div class="meta">
+            <div id="profileTag"></div>
+            <div class="subscores" id="subscores"></div>
+          </div>
+        </div>
+        <div class="analysis" id="analysis" style="margin-top:20px"></div>
+      </div>
+    </section>
+
+    <!-- after -->
+    <section class="panel" id="panel-after">
+      <div class="card">
+        <p class="eyebrow" data-t="ebAfter">After training · Diary</p>
+        <h2 data-t="diaryTitle">Session review</h2>
+        <p class="lead" data-t="diaryLead">Fill it in while the session is fresh. This is what shapes tomorrow's plan.</p>
+        <div class="field"><label class="q" data-t="dSession">Session type</label>
+          <div class="chips" id="dSession">
+            <label><input type="radio" name="sessType" value="dry"><span data-t="sDry">Dry-fire</span></label>
+            <label><input type="radio" name="sessType" value="live" checked><span data-t="sLive">Live</span></label>
+            <label><input type="radio" name="sessType" value="sim"><span data-t="sSim">Match-sim</span></label>
+            <label><input type="radio" name="sessType" value="rest"><span data-t="sRest">Rest/light</span></label>
+          </div></div>
+        <div class="field"><label class="q" data-t="dShots">Shots fired</label><input type="number" id="dShots" min="0" step="10" placeholder="120"></div>
+        <div class="field"><label class="q"><span data-t="dArousal">How wound up / keyed-up you felt</span> <span class="help" data-t="dArousalHelp">— calm & steady is the target</span></label>
+          <div class="sliderow"><input type="range" id="dArousal" min="0" max="10" value="5"><span class="val mono" id="dArousalV">5</span></div></div>
+        <div class="field"><label class="q" data-t="dFocus">Focus / Quiet Eye quality</label>
+          <div class="sliderow"><input type="range" id="dFocus" min="0" max="10" value="5"><span class="val mono" id="dFocusV">5</span></div></div>
+        <div class="field"><label class="q" data-t="dRoutine">Pre-shot routine consistency</label>
+          <div class="chips" id="dRoutine">
+            <label><input type="radio" name="routine" value="every" checked><span data-t="rEvery">Every shot</span></label>
+            <label><input type="radio" name="routine" value="most"><span data-t="rMost">Most</span></label>
+            <label><input type="radio" name="routine" value="some"><span data-t="rSome">Some</span></label>
+            <label><input type="radio" name="routine" value="lost"><span data-t="rLost">Lost it</span></label>
+          </div></div>
+        <div class="field"><label class="q" data-t="dReset">Reset after a bad shot</label>
+          <div class="chips" id="dReset">
+            <label><input type="radio" name="reset" value="fast" checked><span data-t="rFast">Fast</span></label>
+            <label><input type="radio" name="reset" value="slow"><span data-t="rSlow">Slow</span></label>
+            <label><input type="radio" name="reset" value="carried"><span data-t="rCarried">Carried over</span></label>
+            <label><input type="radio" name="reset" value="na"><span data-t="rNa">N/A</span></label>
+          </div></div>
+        <div class="field"><label class="q" data-t="dBest">Best shot or series today, and why</label><textarea id="dBest" rows="2"></textarea></div>
+        <div class="field"><label class="q" data-t="dBroke">What broke focus or steadiness</label><textarea id="dBroke" rows="2"></textarea></div>
+        <div class="field"><label class="q" data-t="dFix">One thing to fix tomorrow</label><textarea id="dFix" rows="2"></textarea></div>
+        <div class="btnrow"><button class="btn" id="saveDiary" data-t="saveDiary">Save review</button>
+          <button class="btn ghost" id="clearDiary" data-t="clearBtn">Clear</button></div>
+      </div>
+      <div class="card hidden" id="diaryFeedback"></div>
+    </section>
+
+    <!-- trend -->
+    <section class="panel" id="panel-trend">
+      <div class="card">
+        <p class="eyebrow" data-t="ebTrend">Day by day</p>
+        <h2 data-t="trendTitle">Your readiness over time</h2>
+        <p class="lead" data-t="trendLead">Each day's mood check is read against the previous session's review. Tap any day to see everything you logged.</p>
+        <div class="btnrow" style="margin-bottom:14px"><button class="btn ghost sm" id="loadDemoSelf" data-t="loadDemoSelf">Load sample data</button></div>
+        <div id="trendSpark"></div>
+        <div id="trendBody"></div>
+      </div>
+    </section>
+
+    <!-- games -->
+    <section class="panel" id="panel-games">
+      <div class="card">
+        <p class="eyebrow" data-t="ebGames">Train your mind</p>
+        <h2 data-t="gamesTitle">Mind games</h2>
+        <p class="lead" data-t="gamesLead">Short drills that train the mental skills shooting needs — calm, focus, and recovery. Your scores are saved to your trend.</p>
+        <div id="gamesGrid" class="gamesgrid"></div>
+      </div>
+      <div id="gameStage"></div>
+    </section>
+
+    <!-- contact -->
+    <section class="panel" id="panel-contact">
+      <div class="card" id="contactCard"></div>
+    </section>
+
+    <!-- toolbox -->
+    <section class="panel" id="panel-toolbox">
+      <div class="card" id="gameplanCard"></div>
+      <div class="card" id="techCard"></div>
+    </section>
+
+    <!-- roster -->
+    <section class="panel" id="panel-roster">
+      <div class="card">
+        <p class="eyebrow" data-t="ebRoster">Squad</p>
+        <h2 data-t="rosterTitle">Athlete roster</h2>
+        <p class="lead" data-t="rosterLead">Each card shows today's readiness and how long since the athlete last logged. Open one for trend and notes.</p>
+        <div class="rostertools">
+          <button class="btn ghost sm" id="exportAll" data-t="exportAll">Export squad CSV</button>
+          <button class="btn ghost sm" id="loadDemoData" data-t="loadDemo">Load demo data</button>
+          <select id="sortRoster">
+            <option value="risk" data-t="sortRisk">Sort: needs attention</option>
+            <option value="name" data-t="sortName">Sort: name</option>
+            <option value="disc" data-t="sortDisc">Sort: discipline</option>
+          </select>
+        </div>
+        <div id="squadOverview"></div>
+        <div class="roster" id="rosterGrid"></div>
+      </div>
+    </section>
+
+    <!-- accounts -->
+    <section class="panel" id="panel-accounts">
+      <div class="card">
+        <p class="eyebrow" data-t="ebAccounts">Admin</p>
+        <h2 data-t="accountsTitle">Manage accounts</h2>
+        <p class="lead" data-t="accountsLead">Create athletes and coaches. Athletes sign in with the ID and passcode you set here.</p>
+        <div class="btnrow" style="margin-bottom:16px"><button class="btn" id="newAccountBtn" data-t="newAccount">+ New account</button></div>
+        <div class="trendwrap"><table class="hist" id="accountsTable"></table></div>
+      </div>
+    </section>
+  </div>
+
+  <footer><span data-t="footer">Built by Ahmad Hishamudin bin Beraim · Sport Psychology Officer, ISN</span></footer>
+</div>
+<div class="toast" id="toast"></div>
+<div id="modalRoot"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+/* ╔═══════════════════════════════════════════════════╗
+   ║  PASTE YOUR FIREBASE CONFIG HERE                    ║
+   ╚═══════════════════════════════════════════════════╝ */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyC6uhxRQxWAgS_KP-gqO5O0umEG6D_NAn4",
+  authDomain: "shotmind-84fcb.firebaseapp.com",
+  projectId: "shotmind-84fcb",
+  storageBucket: "shotmind-84fcb.firebasestorage.app",
+  messagingSenderId: "179902352786",
+  appId: "1:179902352786:web:adf38571cecc765263054b",
+  measurementId: "G-PHV9DK1JNM"
+};
+const CONFIGURED = !FIREBASE_CONFIG.apiKey.startsWith("PASTE_");
+
+/* ╔═══════════════════════════════════════════════════╗
+   ║  YOUR CONTACT DETAILS — edit these                 ║
+   ║  WhatsApp number in full international format,      ║
+   ║  digits only, no + or spaces (e.g. 60123456789).   ║
+   ╚═══════════════════════════════════════════════════╝ */
+const PSYCH = {
+  name: "Ahmad Hishamudin bin Beraim",
+  role: "Sport Psychology Officer · ISN",
+  whatsapp: "601112033848",         // Malaysia +60, leading 0 dropped
+  email: "ahmad@example.com"        // optional
+};
+
+/* ╔═══════════════════════════════════════════════════════════╗
+   ║  OPTIONAL — AI insight (Claude / Fable 5), staff-side only ║
+   ║  ⚠ SECURITY: any key in this file can be extracted by      ║
+   ║  anyone you share the file with. Only enable on a PRIVATE  ║
+   ║  copy for your own use, or route through your own proxy.   ║
+   ║  Leave enabled:false for the copy athletes use.            ║
+   ╚═══════════════════════════════════════════════════════════╝ */
+const AI = {
+  enabled: false,
+  apiKey: "PASTE_ANTHROPIC_API_KEY",
+  model: "claude-fable-5"
+};
+
+let db=null, OFFLINE=!CONFIGURED;
+if(CONFIGURED){ try{ firebase.initializeApp(FIREBASE_CONFIG); db=firebase.firestore(); }catch(e){ console.error(e); OFFLINE=true; } }
+const mem={users:{},days:{},notes:{}};
+
+const DB={
+  async getUser(id){ if(OFFLINE)return mem.users[id]||null; const d=await db.collection("users").doc(id).get(); return d.exists?d.data():null; },
+  async setUser(id,data){ if(OFFLINE){mem.users[id]={...(mem.users[id]||{}),...data};return;} await db.collection("users").doc(id).set(data,{merge:true}); },
+  async listUsers(){ if(OFFLINE)return Object.entries(mem.users).map(([id,v])=>({id,...v})); const s=await db.collection("users").get(); return s.docs.map(d=>({id:d.id,...d.data()})); },
+  async deleteUser(id){ if(OFFLINE){delete mem.users[id];return;} await db.collection("users").doc(id).delete(); },
+  async getDay(uid,date){ const k=uid+"_"+date; if(OFFLINE)return mem.days[k]||null; const d=await db.collection("days").doc(k).get(); return d.exists?d.data():null; },
+  async setDay(uid,date,data){ const k=uid+"_"+date; if(OFFLINE){mem.days[k]={...(mem.days[k]||{}),...data,uid,date};return;} await db.collection("days").doc(k).set({...data,uid,date},{merge:true}); },
+  async listDaysFor(uid){ if(OFFLINE)return Object.values(mem.days).filter(d=>d.uid===uid).sort((a,b)=>a.date<b.date?-1:1); const s=await db.collection("days").where("uid","==",uid).get(); return s.docs.map(d=>d.data()).sort((a,b)=>a.date<b.date?-1:1); },
+  async addNote(uid,note){ if(OFFLINE){(mem.notes[uid]=mem.notes[uid]||[]).push(note);return;} await db.collection("notes").add({uid,...note}); },
+  async listNotes(uid){ if(OFFLINE)return (mem.notes[uid]||[]).slice().sort((a,b)=>b.at<a.at?-1:1); const s=await db.collection("notes").where("uid","==",uid).get(); return s.docs.map(d=>d.data()).sort((a,b)=>b.at<a.at?-1:1); }
+};
+
+/* ---------- i18n (EN/KO) ---------- */
+const I18N={
+  en:{appSub:"Shooting Readiness System",logout:"Log out",
+    cfgTitle:"Firebase not connected.",cfgBody:" Paste your project config into the FIREBASE_CONFIG block at the top of the script and reload. Until then ShotMind runs on demo data stored only in this browser.",
+    signIn:"Sign in",loginTitle:"Enter your access",loginLead:"Use the User ID and passcode your sport psychologist issued you.",
+    userId:"User ID",passcode:"Passcode",loginBtn:"Sign in",demoHint:"Demo: ",
+    ebBefore:"Before training · Mood check",brumsTitle:"Quick mood check",brumsLead:"Six quick ratings of how you feel right now. Takes 30 seconds — this sets today's plan.",
+    brumsDone:"Logged today already. Submitting again overwrites it.",anchor0:"0 — not at all",anchor4:"4 — extremely",
+    rightNow:"Right now I feel…",
+    getPlan:"Read today's plan",clearBtn:"Clear",ebResult:"Readiness",
+    ebAfter:"After training · Diary",diaryTitle:"Session review",diaryLead:"Fill it in while the session is fresh. This is what shapes tomorrow's plan.",
+    dSession:"Session type",sDry:"Dry-fire",sLive:"Live",sSim:"Match-sim",sRest:"Rest/light",dShots:"Shots fired",
+    dArousal:"How wound up / keyed-up you felt",dArousalHelp:"— calm & steady is the target",dFocus:"How sharp your focus was",
+    dRoutine:"Pre-shot routine consistency",rEvery:"Every shot",rMost:"Most",rSome:"Some",rLost:"Lost it",
+    dReset:"Reset after a bad shot",rFast:"Fast",rSlow:"Slow",rCarried:"Carried over",rNa:"N/A",
+    dBest:"Best shot or series today, and why",dBroke:"What broke focus or steadiness",dFix:"One thing to fix tomorrow",
+    saveDiary:"Save review",ebTrend:"Day by day",trendTitle:"Your readiness over time",trendLead:"Each day's mood check is read against the previous session's review.",
+    ebRoster:"Squad",rosterTitle:"Athlete roster",rosterLead:"Each card shows today's readiness and how long since the athlete last logged. Open one for trend and notes.",
+    exportAll:"Export squad CSV",loadDemo:"Load demo data",sortRisk:"Sort: needs attention",sortName:"Sort: name",sortDisc:"Sort: discipline",
+    ebAccounts:"Admin",accountsTitle:"Manage accounts",accountsLead:"Create athletes and coaches. Athletes sign in with the ID and passcode you set here.",newAccount:"+ New account",
+    footer:"Built by Ahmad Hishamudin bin Beraim · Sport Psychology Officer, ISN",
+    tBefore:"Before",tBeforeS:"BRUMS",tAfter:"After",tAfterS:"Diary",tTrend:"Trend",tTrendS:"Daily",tRoster:"Squad",tRosterS:"Athletes",tAccounts:"Accounts",tAccountsS:"Admin",
+    tGames:"Games",tGamesS:"Mind",tContact:"Contact",tContactS:"Reach me",
+    ebGames:"Train your mind",gamesTitle:"Mind games",gamesLead:"Short drills that train the mental skills shooting needs — calm, focus, and recovery. Your scores are saved to your trend.",
+    gBest:"Best",gNew:"New — try it",gExit:"Exit",gAgain:"Play again",gSaved:"Saved to your record ✓",gHoldStart:"Press and hold the target.",gTouchStart:"Touch and hold inside the ring.",gWatch:"Watch…",gYourTurn:"Your turn",
+    ebContact:"Get support",ctEyebrow:"Reach me",ctTitle:"Contact your sport psychologist",ctLead:"Book a session or send a quick message. It opens WhatsApp with your details already filled in.",
+    ctReason:"Reason",ctR1:"Book a session",ctR2:"I'd like to talk",ctR3:"Help with the app",ctR4:"Something else",
+    ctMsg:"Your message (optional)",ctMsgPh:"Add anything you'd like me to know…",ctSendWa:"Send on WhatsApp",
+    ctNote:"This opens WhatsApp — you send the message yourself, nothing is sent automatically.",ctHello:"Hi",ctThis:"this is",
+    profStrong:"Sharp & ready",profOk:"Ready — mind focus",profFlat:"Low energy",profStress:"Tense / stressed",profMixed:"Mixed",
+    aPros:"Today's strengths",aCons:"Today's risks",aPlan:"How to train today",aCarry:"From your last session",
+    noPros:"No standout strength — focus on the fundamentals.",noCons:"No clear risk. Proceed as planned.",noCarry:"No previous session logged yet. Fill the diary today to sharpen tomorrow's plan.",
+    saveFirst:"Rate all six first.",diarySaved:"Review saved.",brumsSaved:"Readiness recorded.",cleared:"Cleared.",
+    thDate:"Date",thScore:"Score",thProfile:"Profile",thRoutine:"Routine",thReset:"Reset",thSession:"Session",
+    mood_T:"Stress",mood_D:"Low mood",mood_A:"Anger",mood_V:"Energy",mood_F:"Tiredness",mood_C:"Confusion",
+    moodCheckTitle:"Mood check",sessionTitle:"Session review",noMood:"No mood check this day.",noDiary:"No session review this day.",
+    backTrend:"‹ Back",loadDemoSelf:"Load sample data",
+    anTitle:"Analysis · what the data says",anAvg:"Avg",anRecent:"Recent",anTrend:"Trend",anRange:"Range",
+    anFocus:"Suggested focus",anNeedMore:"Needs at least 3 logged days for analysis.",
+    anDisclaimer:"Descriptive summary of logged data — a prompt for your judgement, not a clinical assessment.",
+    fbTitle:"For you",fbHead:"Today's session, read back",
+    tTool:"Toolbox",tToolS:"My plan",
+    gpEyebrow:"Always with you",gpTitle:"My game plan",gpLead:"Your pre-shot routine, cue word, and reset plan — in your own words, on your phone, at the line.",
+    gpRoutine:"My pre-shot routine",gpRoutineH:"— the same steps, every shot",gpRoutinePh:"e.g. Feet set → grip → breathe out → sight picture → hold → squeeze",
+    gpCue:"My cue word",gpCueH:"— one word that puts you in the zone",gpCuePh:"e.g. Smooth",
+    gpReset:"My bad-shot reset",gpResetH:"— what you do after a poor shot",gpResetPh:"e.g. Lower rifle, one long breath, say my cue, next shot is new",
+    gpWhy:"Why I shoot",gpWhyPh:"Your reason — read it on hard days",
+    gpSave:"Save my plan",gpSaved:"Game plan saved ✓",
+    tqEyebrow:"Quick techniques",tqTitle:"Pocket skills",
+    tq1T:"Box breathing (4-4-4-4)",tq1B:"Breathe in 4s, hold 4s, out 4s, hold 4s. Use before shooting, between series, or any time stress climbs. Try it in the Games tab.",
+    tq2T:"Muscle release scan",tq2B:"Squeeze shoulders up to your ears for 5s, release slowly. Then jaw, then hands. Tension hides in these three places.",
+    tq3T:"Cue word + self-talk",tq3B:"Say your cue word on every shot. If negative talk starts, answer it: 'next shot is new'. You talk to yourself all day — make it coaching, not criticism.",
+    tq4T:"Bad-shot reset",tq4B:"Lower the rifle. One long exhale. Say your cue. The last shot no longer exists — only the next one. Practise it in Reaction & Reset.",
+    recGameT:"Recommended for today",recGameBtn:"Try now",
+    ovAvg:"Squad avg today",ovLogged:"Logged today",ovFlags:"Needs attention",aiBtn:"AI insight (Claude)",aiThinking:"Thinking…",aiFail:"AI insight unavailable — check the key and connection.",aiDisc:"AI-generated prompts from descriptive stats only — your judgement decides.",
+    readyLbl:"Ready",emptyTrendT:"No readings yet",emptyTrendB:"Your first mood check will start the chart.",
+    loginFail:"That ID and passcode don't match.",noteAdd:"Add note",notePlace:"Write a note for this athlete…",notesTitle:"Notes",
+    noNotesT:"No notes yet",noNotesB:"Notes you add here stay with this athlete's record.",privLbl:"Staff only",privToggle:"Visible to athlete",
+    colId:"ID",colName:"Name",colRole:"Role",colDisc:"Discipline",colPass:"Passcode",colAct:"Actions",del:"Delete",editPass:"Passcode",
+    fName:"Full name",fId:"User ID",fRole:"Role",fDisc:"Discipline",fPass:"Passcode (4 digits)",create:"Create account",cancel:"Cancel",save:"Save",
+    rAthlete:"Athlete",rCoach:"Coach",rAdmin:"Admin / Psych",created:"Account created.",updated:"Updated.",deleted:"Account deleted.",demoLoaded:"Demo data loaded.",exported:"CSV exported.",
+    back:"‹ Squad",readiness:"Latest readiness",noEntry:"No reading",discRifle:"Rifle",discPistol:"Pistol",discShotgun:"Shotgun",
+    streakTitle:"day streak",streakSub:"Mood checks logged in a row. Daily logging is what makes the plan accurate.",
+    lastLogged:"last logged",today:"today",dayAgo:"1 day ago",daysAgo:"days ago",never:"never",rosterEmptyT:"No athletes yet",rosterEmptyB:"Add athletes in the Accounts tab, or load demo data to explore.",
+    idTaken:"That ID is already taken."},
+  ko:{appSub:"사격 준비도 시스템",logout:"로그아웃",
+    cfgTitle:"Firebase 미연결.",cfgBody:" 스크립트 상단 FIREBASE_CONFIG 블록에 프로젝트 구성을 붙여넣고 새로고침하세요. 그 전까지는 이 브라우저에만 저장되는 데모 데이터로 실행됩니다.",
+    signIn:"로그인",loginTitle:"접근 정보 입력",loginLead:"스포츠 심리관이 발급한 사용자 ID와 비밀번호를 사용하세요.",
+    userId:"사용자 ID",passcode:"비밀번호",loginBtn:"로그인",demoHint:"데모: ",
+    ebBefore:"훈련 전 · 기분 점검",brumsTitle:"빠른 기분 점검",brumsLead:"지금 느끼는 기분을 6개 항목으로 빠르게 평가하세요. 30초면 됩니다 — 오늘의 계획을 만듭니다.",
+    brumsDone:"오늘 이미 기록함. 다시 제출하면 덮어씁니다.",anchor0:"0 — 전혀 아님",anchor4:"4 — 매우 그렇다",
+    rightNow:"지금 나는…",
+    getPlan:"오늘의 계획 보기",clearBtn:"지우기",ebResult:"준비도",
+    ebAfter:"훈련 후 · 일지",diaryTitle:"세션 리뷰",diaryLead:"기억이 생생할 때 작성하세요. 이것이 내일 계획을 만듭니다.",
+    dSession:"세션 유형",sDry:"드라이파이어",sLive:"실탄",sSim:"경기 시뮬",sRest:"휴식/가벼움",dShots:"발사 수",
+    dArousal:"얼마나 긴장·흥분했나",dArousalHelp:"— 차분하고 안정적인 것이 목표",dFocus:"집중이 얼마나 또렷했나",
+    dRoutine:"사전 루틴 일관성",rEvery:"매 발",rMost:"대부분",rSome:"일부",rLost:"무너짐",
+    dReset:"실수 후 리셋",rFast:"빠름",rSlow:"느림",rCarried:"이어짐",rNa:"해당 없음",
+    dBest:"오늘 최고의 사격/시리즈와 이유",dBroke:"집중·안정을 무너뜨린 것",dFix:"내일 고칠 한 가지",
+    saveDiary:"리뷰 저장",ebTrend:"일별",trendTitle:"기간별 준비도",trendLead:"매일의 기분 점검을 직전 세션 리뷰와 함께 읽습니다.",
+    ebRoster:"스쿼드",rosterTitle:"선수 명단",rosterLead:"각 카드는 오늘의 준비도와 마지막 기록 이후 경과를 보여줍니다. 카드를 열어 추세와 메모를 확인하세요.",
+    exportAll:"스쿼드 CSV 내보내기",loadDemo:"데모 데이터 불러오기",sortRisk:"정렬: 주의 필요",sortName:"정렬: 이름",sortDisc:"정렬: 종목",
+    ebAccounts:"관리자",accountsTitle:"계정 관리",accountsLead:"선수와 코치를 만듭니다. 선수는 여기서 설정한 ID와 비밀번호로 로그인합니다.",newAccount:"+ 새 계정",
+    footer:"제작: Ahmad Hishamudin bin Beraim · 스포츠 심리관, ISN",
+    tBefore:"훈련 전",tBeforeS:"BRUMS",tAfter:"훈련 후",tAfterS:"일지",tTrend:"추세",tTrendS:"일별",tRoster:"스쿼드",tRosterS:"선수",tAccounts:"계정",tAccountsS:"관리자",
+    tGames:"게임",tGamesS:"멘탈",tContact:"연락",tContactS:"문의",
+    ebGames:"마음 훈련",gamesTitle:"멘탈 게임",gamesLead:"사격에 필요한 멘탈 기술 — 진정·집중·회복 — 을 훈련하는 짧은 드릴. 점수는 추세에 저장됩니다.",
+    gBest:"최고",gNew:"신규 — 해보기",gExit:"나가기",gAgain:"다시 하기",gSaved:"기록에 저장됨 ✓",gHoldStart:"타깃을 누르고 유지하세요.",gTouchStart:"링 안을 누르고 유지하세요.",gWatch:"보세요…",gYourTurn:"당신 차례",
+    ebContact:"지원 받기",ctEyebrow:"문의",ctTitle:"스포츠 심리관에게 연락",ctLead:"세션을 예약하거나 짧은 메시지를 보내세요. 정보가 채워진 채 WhatsApp이 열립니다.",
+    ctReason:"사유",ctR1:"세션 예약",ctR2:"상담 원함",ctR3:"앱 도움",ctR4:"기타",
+    ctMsg:"메시지 (선택)",ctMsgPh:"알려주고 싶은 내용을 적으세요…",ctSendWa:"WhatsApp으로 보내기",
+    ctNote:"WhatsApp이 열립니다 — 직접 전송하며, 자동으로 보내지지 않습니다.",ctHello:"안녕하세요",ctThis:"저는",
+    profStrong:"예리하고 준비됨",profOk:"준비됨 — 집중 유지",profFlat:"에너지 낮음",profStress:"긴장 / 스트레스",profMixed:"혼재",
+    aPros:"오늘의 강점",aCons:"오늘의 위험",aPlan:"오늘 훈련 방법",aCarry:"직전 세션에서",
+    noPros:"두드러진 강점 없음 — 기본기에 집중.",noCons:"뚜렷한 위험 없음. 계획대로 진행.",noCarry:"아직 직전 세션 기록이 없습니다. 오늘 일지를 작성하면 내일 계획이 정교해집니다.",
+    saveFirst:"6개 항목을 모두 평가하세요.",diarySaved:"리뷰 저장됨.",brumsSaved:"준비도 기록됨.",cleared:"지워졌습니다.",
+    thDate:"날짜",thScore:"점수",thProfile:"프로필",thRoutine:"루틴",thReset:"리셋",thSession:"세션",
+    mood_T:"긴장",mood_D:"우울",mood_A:"분노",mood_V:"활력",mood_F:"피로",mood_C:"혼란",
+    moodCheckTitle:"기분 점검",sessionTitle:"세션 리뷰",noMood:"이 날 기분 점검 없음.",noDiary:"이 날 세션 리뷰 없음.",
+    backTrend:"‹ 뒤로",loadDemoSelf:"샘플 데이터 불러오기",
+    anTitle:"분석 · 데이터가 말하는 것",anAvg:"평균",anRecent:"최근",anTrend:"추세",anRange:"범위",
+    anFocus:"제안 초점",anNeedMore:"분석하려면 최소 3일의 기록이 필요합니다.",
+    anDisclaimer:"기록된 데이터의 서술적 요약 — 임상 평가가 아니라 판단을 돕는 길잡이입니다.",
+    fbTitle:"당신에게",fbHead:"오늘 세션, 다시 읽어드립니다",
+    tTool:"도구함",tToolS:"내 계획",
+    gpEyebrow:"언제나 함께",gpTitle:"나의 게임 플랜",gpLead:"사전 루틴, 큐 단어, 리셋 계획 — 당신의 말로, 당신의 폰에, 사선에서.",
+    gpRoutine:"나의 사전 루틴",gpRoutineH:"— 매 발 같은 순서",gpRoutinePh:"예: 발 고정 → 그립 → 내쉬기 → 조준 → 유지 → 격발",
+    gpCue:"나의 큐 단어",gpCueH:"— 존에 들어가게 하는 한 단어",gpCuePh:"예: 부드럽게",
+    gpReset:"나의 실수-후 리셋",gpResetH:"— 나쁜 발 이후 하는 것",gpResetPh:"예: 총 내리고, 긴 호흡 한 번, 큐 단어, 다음 발은 새 발",
+    gpWhy:"내가 쏘는 이유",gpWhyPh:"당신의 이유 — 힘든 날 읽으세요",
+    gpSave:"내 계획 저장",gpSaved:"게임 플랜 저장됨 ✓",
+    tqEyebrow:"빠른 기술",tqTitle:"주머니 속 기술",
+    tq1T:"박스 호흡 (4-4-4-4)",tq1B:"4초 들이쉬고, 4초 멈추고, 4초 내쉬고, 4초 멈춤. 사격 전·시리즈 사이·긴장될 때. 게임 탭에서 연습하세요.",
+    tq2T:"근육 이완 스캔",tq2B:"어깨를 귀까지 5초 조였다가 천천히 풀기. 그다음 턱, 그다음 손. 긴장은 이 세 곳에 숨습니다.",
+    tq3T:"큐 단어 + 셀프토크",tq3B:"매 발 큐 단어를 말하세요. 부정적인 말이 시작되면 답하세요: '다음 발은 새 발'. 하루 종일 자신과 대화합니다 — 비난이 아닌 코칭으로.",
+    tq4T:"실수-후 리셋",tq4B:"총을 내립니다. 긴 날숨 한 번. 큐 단어. 지난 발은 없습니다 — 다음 발만 있습니다. 반응·리셋 게임에서 연습하세요.",
+    recGameT:"오늘의 추천",recGameBtn:"지금 하기",
+    ovAvg:"오늘 스쿼드 평균",ovLogged:"오늘 기록",ovFlags:"주의 필요",aiBtn:"AI 인사이트 (Claude)",aiThinking:"생각 중…",aiFail:"AI 인사이트 사용 불가 — 키와 연결 확인.",aiDisc:"서술 통계만으로 생성된 AI 프롬프트 — 판단은 당신의 몫.",
+    readyLbl:"준비도",emptyTrendT:"아직 기록 없음",emptyTrendB:"첫 기분 점검이 차트를 시작합니다.",
+    loginFail:"ID와 비밀번호가 일치하지 않습니다.",noteAdd:"메모 추가",notePlace:"이 선수를 위한 메모 작성…",notesTitle:"메모",
+    noNotesT:"메모 없음",noNotesB:"여기 추가한 메모는 이 선수 기록에 보관됩니다.",privLbl:"스태프 전용",privToggle:"선수에게 표시",
+    colId:"ID",colName:"이름",colRole:"역할",colDisc:"종목",colPass:"비밀번호",colAct:"작업",del:"삭제",editPass:"비밀번호",
+    fName:"전체 이름",fId:"사용자 ID",fRole:"역할",fDisc:"종목",fPass:"비밀번호(4자리)",create:"계정 생성",cancel:"취소",save:"저장",
+    rAthlete:"선수",rCoach:"코치",rAdmin:"관리자/심리",created:"계정 생성됨.",updated:"수정됨.",deleted:"계정 삭제됨.",demoLoaded:"데모 데이터 불러옴.",exported:"CSV 내보냄.",
+    back:"‹ 스쿼드",readiness:"최근 준비도",noEntry:"기록 없음",discRifle:"라이플",discPistol:"피스톨",discShotgun:"샷건",
+    streakTitle:"일 연속",streakSub:"연속으로 기록한 기분 점검. 매일 기록해야 계획이 정확해집니다.",
+    lastLogged:"마지막 기록",today:"오늘",dayAgo:"1일 전",daysAgo:"일 전",never:"없음",rosterEmptyT:"선수 없음",rosterEmptyB:"계정 탭에서 선수를 추가하거나 데모 데이터를 불러오세요.",
+    idTaken:"이미 사용 중인 ID입니다."}
+};
+let LANG="en";
+function t(k){return (I18N[LANG]&&I18N[LANG][k])||I18N.en[k]||k;}
+
+/* ---------- Brief Mood Check (6 items, one per BRUMS construct) ----------
+   Each construct scored 0-4. NOT the validated 24-item BRUMS — a fast daily
+   pulse for applied monitoring. Subscale range is 0-4 (vs 0-16 full BRUMS). */
+const BRUMS_ITEMS=[
+  ["Tense","긴장됨","T"],
+  ["Down","우울함","D"],
+  ["Angry","화남","A"],
+  ["Energetic","활기참","V"],
+  ["Tired","피곤함","F"],
+  ["Confused","혼란스러움","C"]
+];
+const SUBS=["T","D","A","V","F","C"];
+const SUB_FULL={T:"Stress",D:"Low mood",A:"Anger",V:"Energy",F:"Tiredness",C:"Confusion"};
+/* ---------- theme (light/dark, persisted, colours adapt) ---------- */
+const THEME_KEY="shotmind_theme";
+const PAL={
+  light:{sub:{T:"#DC2626",D:"#7C3AED",A:"#D97706",V:"#189A55",F:"#0FA396",C:"#64748B"},
+         tag:{profStrong:"#189A55",profOk:"#0FA396",profFlat:"#D97706",profStress:"#DC2626",profMixed:"#64748B"},
+         score:["#189A55","#0FA396","#D97706","#DC2626"],meta:"#F4F7FB"},
+  dark: {sub:{T:"#FF6B54",D:"#B491F2",A:"#FFB347",V:"#57DD8E",F:"#4FE0CE",C:"#9AA8C0"},
+         tag:{profStrong:"#57DD8E",profOk:"#4FE0CE",profFlat:"#FFB347",profStress:"#FF6B54",profMixed:"#9AA8C0"},
+         score:["#57DD8E","#4FE0CE","#FFB347","#FF6B54"],meta:"#141C2C"}
+};
+function getTheme(){try{return localStorage.getItem(THEME_KEY)||"light";}catch(e){return "light";}}
+let SUB_COLOR=PAL.light.sub,TAG_COLOR=PAL.light.tag,SCORE_C=PAL.light.score;
+function applyTheme(mode){
+  document.documentElement.dataset.theme=mode;
+  const p=PAL[mode]||PAL.light;SUB_COLOR=p.sub;TAG_COLOR=p.tag;SCORE_C=p.score;
+  const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=p.meta;
+  const tb=document.getElementById("themeToggle");
+  if(tb)tb.innerHTML=mode==="dark"
+    ?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
+    :'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+}
+applyTheme(getTheme());
+function scoreColor(r){return r>=75?SCORE_C[0]:r>=55?SCORE_C[1]:r>=40?SCORE_C[2]:SCORE_C[3];}
+const SUB_MAX=4; // per-construct max on the brief scale
+function tmd(s){return (s.T+s.D+s.A+s.F+s.C)-s.V;}
+/* readiness 0-100: high vigour good, others bad. TMD ranges -4..20 -> invert to 0-100 */
+function readiness(s){const raw=tmd(s);const r=Math.round(100-((raw+4)/24*100));return Math.max(0,Math.min(100,r));}
+/* thresholds scaled to the 0-4 brief scale (was 0-16) */
+function classify(s){const high=v=>v>=3;
+  if(s.V>=3&&s.F<=1&&s.T<=1)return "profStrong";
+  if(high(s.T)||high(s.A)||high(s.D))return "profStress";
+  if(s.F>=3||s.V<=1)return "profFlat";
+  if(s.V>=2&&s.T<=2&&s.F<=2)return "profOk";
+  return "profMixed";}
+/* TAG_COLOR & scoreColor are theme-adaptive (see PAL above) */
+
+/* ---------- session ---------- */
+let SESSION=null,currentTab=null;
+const todayKey=()=>new Date().toISOString().slice(0,10);
+const yesterdayKey=()=>{const d=new Date();d.setDate(d.getDate()-1);return d.toISOString().slice(0,10);};
+const fmtDate=iso=>new Date(iso+"T00:00:00").toLocaleDateString(LANG==="ko"?"ko-KR":"en-GB",{day:"numeric",month:"short"});
+const daysBetween=(a,b)=>Math.round((new Date(b+"T00:00:00")-new Date(a+"T00:00:00"))/86400000);
+function toast(m){const e=document.getElementById("toast");e.textContent=m;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),2400);}
+
+async function ensureSeed(){
+  if(await DB.getUser("admin"))return;
+  await DB.setUser("admin",{name:"Ahmad Hishamudin",role:"admin",pass:"0000",discipline:""});
+  await DB.setUser("coach1",{name:"Head Coach",role:"coach",pass:"1111",discipline:""});
+  await DB.setUser("RIF01",{name:"Aiman",role:"athlete",pass:"2222",discipline:"rifle"});
+  await DB.setUser("PIS01",{name:"Nadia",role:"athlete",pass:"3333",discipline:"pistol"});
+  await DB.setUser("SHO01",{name:"Hafiz",role:"athlete",pass:"4444",discipline:"shotgun"});
+}
+
+/* ---------- lang/tabs ---------- */
+function applyLang(){
+  document.documentElement.lang=LANG;
+  document.querySelectorAll("[data-t]").forEach(el=>{const v=t(el.getAttribute("data-t"));if(v.includes("<"))el.innerHTML=v;else el.textContent=v;});
+  if(SESSION){buildTabs();renderWhoAmI();if(currentTab)showTab(currentTab,true);}
+  buildBrumsList();
+}
+const TAB_DEFS={athlete:[["before","tBefore","tBeforeS"],["after","tAfter","tAfterS"],["trend","tTrend","tTrendS"],["games","tGames","tGamesS"],["toolbox","tTool","tToolS"],["contact","tContact","tContactS"]],
+  coach:[["roster","tRoster","tRosterS"]],admin:[["roster","tRoster","tRosterS"],["accounts","tAccounts","tAccountsS"]]};
+const _si=p=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+const TAB_ICON={
+  before:_si('<path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="9" x2="12" y2="2"/><line x1="4.2" y1="10.2" x2="5.6" y2="11.6"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.4" y1="11.6" x2="19.8" y2="10.2"/><line x1="22" y1="22" x2="2" y2="22"/><polyline points="8 6 12 2 16 6"/>'),
+  after:_si('<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="m9 14 2 2 4-4"/>'),
+  trend:_si('<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>'),
+  games:_si('<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>'),
+  toolbox:_si('<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>'),
+  contact:_si('<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>'),
+  roster:_si('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'),
+  accounts:_si('<path d="m21 2-2 2m-7.6 7.6a5.5 5.5 0 1 1-7.8 7.8 5.5 5.5 0 0 1 7.8-7.8zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/>')
+};
+function buildTabs(){const host=document.getElementById("tabs");host.innerHTML="";
+  (TAB_DEFS[SESSION.role]||[]).forEach(([id,tk,sk])=>{const b=document.createElement("button");b.dataset.tab=id;
+    b.innerHTML=`<span class="ticon">${TAB_ICON[id]||"•"}</span><span class="tlabel">${t(tk)}</span><span class="tag">${t(sk)}</span>`;if(id===currentTab)b.classList.add("on");
+    b.addEventListener("click",()=>showTab(id));host.appendChild(b);});}
+function showTab(id,keep){currentTab=id;if(typeof cancelGame==="function")cancelGame();
+  document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===id));
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("on"));
+  const panel=document.getElementById("panel-"+id);if(panel)panel.classList.add("on");
+  if(id==="before"){if(!keep)refreshBefore();renderStreak();}
+  if(id==="after"&&!keep)refreshAfter();
+  if(id==="trend")renderTrend(SESSION.id);
+  if(id==="games")renderGames();
+  if(id==="toolbox")renderToolbox();
+  if(id==="contact")renderContact();
+  if(id==="roster")renderRoster();
+  if(id==="accounts")renderAccounts();}
+function renderWhoAmI(){const w=document.getElementById("whoami");
+  const rc={athlete:"r-athlete",coach:"r-coach",admin:"r-admin"}[SESSION.role];
+  const rl={athlete:t("rAthlete"),coach:t("rCoach"),admin:t("rAdmin")}[SESSION.role];
+  w.innerHTML=`<span class="nm">${SESSION.name}</span><span class="rolebadge ${rc}">${rl}</span>`;w.classList.remove("hidden");}
+
+/* ---------- BRUMS UI ---------- */
+function buildBrumsList(){const wrap=document.getElementById("brumsList");if(!wrap)return;
+  const prev={};wrap.querySelectorAll("input:checked").forEach(i=>prev[i.name]=i.value);wrap.innerHTML="";
+  BRUMS_ITEMS.forEach((it,idx)=>{const word=LANG==="en"?it[0]:it[1];const row=document.createElement("div");row.className="brums-item";
+    let sc='<div class="scale">';for(let s=0;s<=4;s++){const chk=prev["b"+idx]===String(s)?"checked":"";
+      sc+=`<label><input type="radio" name="b${idx}" value="${s}" ${chk}><span>${s}</span></label>`;}sc+='</div>';
+    row.innerHTML=`<div class="brums-word"><span class="n" style="background:${SUB_COLOR[it[2]]}22;color:${SUB_COLOR[it[2]]};border-radius:5px;padding:2px 7px">${it[2]}</span>${word}</div>${sc}`;wrap.appendChild(row);});}
+function readBrums(){const s={T:0,D:0,A:0,V:0,F:0,C:0};let n=0;
+  BRUMS_ITEMS.forEach((it,idx)=>{const sel=document.querySelector(`input[name="b${idx}"]:checked`);if(sel){n++;s[it[2]]+=parseInt(sel.value,10);}});
+  return {scores:s,complete:n===BRUMS_ITEMS.length};}
+
+/* ---------- reticle viz ---------- */
+function drawReticle(el,r){
+  const col=scoreColor(r);const C=100,R=86;const circ=2*Math.PI*R;const off=circ*(1-r/100);
+  el.innerHTML=`<svg viewBox="0 0 200 200" width="200" height="200">
+    <circle cx="100" cy="100" r="86" fill="none" stroke="#DCE4EF" stroke-width="10"/>
+    <circle cx="100" cy="100" r="64" fill="none" stroke="#E7EDF5" stroke-width="1"/>
+    <circle cx="100" cy="100" r="42" fill="none" stroke="#E7EDF5" stroke-width="1"/>
+    <circle cx="100" cy="100" r="86" fill="none" stroke="${col}" stroke-width="10" stroke-linecap="round"
+      stroke-dasharray="${circ}" stroke-dashoffset="${off}" transform="rotate(-90 100 100)" style="transition:stroke-dashoffset .8s ease"/>
+    <line x1="100" y1="18" x2="100" y2="38" stroke="#C3CFDF" stroke-width="1.5"/>
+    <line x1="100" y1="162" x2="100" y2="182" stroke="#C3CFDF" stroke-width="1.5"/>
+    <line x1="18" y1="100" x2="38" y2="100" stroke="#C3CFDF" stroke-width="1.5"/>
+    <line x1="162" y1="100" x2="182" y2="100" stroke="#C3CFDF" stroke-width="1.5"/>
+    <circle cx="100" cy="100" r="3" fill="${col}"/>
+  </svg>
+  <div class="score"><div class="num" style="color:${col}">${r}</div><div class="lbl">${t("readyLbl")}</div></div>`;
+}
+function miniRing(r){const col=scoreColor(r);const C=23,circ=2*Math.PI*19,off=circ*(1-r/100);
+  return `<svg class="ring" viewBox="0 0 46 46"><circle cx="23" cy="23" r="19" fill="none" stroke="#DCE4EF" stroke-width="4"/>
+    <circle cx="23" cy="23" r="19" fill="none" stroke="${col}" stroke-width="4" stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${off}" transform="rotate(-90 23 23)"/>
+    <text x="23" y="27" text-anchor="middle" font-family="JetBrains Mono" font-size="13" font-weight="700" fill="${col}">${r}</text></svg>`;}
+
+/* ---------- analysis ---------- */
+function buildAnalysis(s,yest){
+  const L=LANG,pick=(en,ko)=>L==="en"?en:ko;const pros=[],cons=[],plan=[],carry=[];
+  if(s.V>=3)pros.push(pick("Good energy — body and mind are switched on.","에너지 좋음 — 몸과 마음이 깨어 있음."));
+  if(s.F<=1)pros.push(pick("Not tired — your hold should be steady.","피곤하지 않음 — 거치 안정적."));
+  if(s.T<=1&&s.A<=1)pros.push(pick("Calm and steady — exactly what shooting rewards.","차분하고 안정적 — 사격이 보상하는 바로 그 상태."));
+  if(s.A<=1&&s.D<=1)pros.push(pick("Clear head, nothing fighting your focus.","머리가 맑고 집중을 방해하는 것이 없음."));
+  if(s.T>=3)cons.push(pick("Very stressed — you might rush the shot. Slow down.","스트레스 높음 — 격발을 서두를 수 있음. 천천히."));
+  if(s.T===2)cons.push(pick("A bit stressed — breathe before each shot to settle.","약간 스트레스 — 매 발 전 호흡으로 안정."));
+  if(s.F>=3)cons.push(pick("Very tired — your hold may shake later in the session.","많이 피곤 — 후반 거치가 흔들릴 수 있음."));
+  if(s.A>=3)cons.push(pick("Quite angry — it can break your routine.","화남 — 루틴이 깨질 수 있음."));
+  if(s.C>=3)cons.push(pick("Feeling foggy — your shot decisions may be slow.","머리가 복잡 — 판단이 느릴 수 있음."));
+  if(s.V<=1)cons.push(pick("Low energy — your focus may fade.","에너지 낮음 — 집중이 흐려질 수 있음."));
+  if(s.D>=3)cons.push(pick("Low mood — look after your motivation today.","기분 저하 — 오늘 동기를 챙기세요."));
+  const prof=classify(s);
+  if(prof==="profStrong"){plan.push(pick("High-load day: match simulation or scored series.","고부하 날: 경기 시뮬 또는 점수 시리즈."));plan.push(pick("Test the pre-shot routine under light pressure.","가벼운 압박 속 사전 루틴 테스트."));}
+  else if(prof==="profStress"){plan.push(pick("Open with 4–6 min breathing before the first shot.","첫 발 전 4–6분 호흡."));plan.push(pick("Lower scored load; prioritise routine and rhythm.","점수 부담 줄이고 루틴·리듬 우선."));plan.push(pick("Deliberately rehearse the bad-shot reset today.","오늘 실수 후 리셋 의도적 연습."));}
+  else if(prof==="profFlat"){plan.push(pick("Shorter, high-quality session — stop before the hold degrades.","짧고 질 높은 세션 — 거치 무너지기 전 종료."));plan.push(pick("Activate: quick imagery plus rhythmic breathing.","활성화: 빠른 이미지+리듬 호흡."));plan.push(pick("Technical and dry-fire focus; avoid long scored series.","기술·드라이파이어 중심; 긴 점수 시리즈 피하기."));}
+  else if(prof==="profOk"){plan.push(pick("Normal planned training — prioritise routine consistency.","계획된 정상 훈련 — 루틴 일관성 우선."));plan.push(pick("Layer Quiet Eye: a quiet final fixation before each release.","Quiet Eye 추가: 매 격발 전 조용한 최종 응시."));}
+  else{plan.push(pick("Start moderate; reassess after the first 20 minutes.","중간 강도로 시작; 첫 20분 후 재평가."));plan.push(pick("Hold one process cue word — 'smooth', 'hold'.","하나의 과정 큐워드 유지 — '부드럽게','거치'."));}
+  if(yest&&yest.diary){const d=yest.diary;
+    if(d.routine==="some"||d.routine==="lost")carry.push(pick("Routine slipped last session — make a fixed routine priority #1 today.","직전 루틴 흔들림 — 오늘 고정 루틴 1순위."));
+    if(d.reset==="slow"||d.reset==="carried")carry.push(pick("Reset was slow last session — drill letting a bad shot go in one breath.","직전 리셋 느림 — 한 호흡에 실수 흘려보내기."));
+    if(typeof d.focus==="number"&&d.focus<=4)carry.push(pick("Focus was low last session — open with a short Quiet Eye drill.","직전 집중 낮음 — 짧은 Quiet Eye 드릴로 시작."));
+    if(typeof d.arousal==="number"&&d.arousal>=8)carry.push(pick("You were very wound up last session — focus on calming down early.","직전에 많이 긴장 — 초반에 진정에 집중."));
+    if(d.fix)carry.push(pick("Your own goal from last time: ","직전 목표: ")+'“'+d.fix+'”');
+    if(!carry.length)carry.push(pick("Last session was solid — keep it going.","직전 세션 양호 — 계속 이어가세요."));}
+  return {pros,cons,plan,carry,prof};
+}
+/* athlete-facing warm line for the BEFORE check (encouraging, never clinical) */
+function readyGreeting(prof){const L=LANG,pick=(en,ko)=>L==="en"?en:ko;
+  return {
+    profStrong:pick("You're sharp today — let's make it count.","오늘 컨디션 좋아요 — 제대로 살려봅시다."),
+    profOk:pick("Good place to start. Hold your focus and trust the routine.","좋은 출발이에요. 집중을 유지하고 루틴을 믿으세요."),
+    profFlat:pick("Low energy today — that's okay. We'll train smart, not hard.","오늘 에너지가 낮네요 — 괜찮아요. 무리하지 말고 현명하게."),
+    profStress:pick("A tense morning happens. Breathe first — you've got this.","긴장된 아침일 수 있어요. 먼저 호흡하세요 — 할 수 있습니다."),
+    profMixed:pick("Mixed signals today. Ease in and feel it out.","오늘은 신호가 섞였어요. 천천히 시작해 보세요.")
+  }[prof];
+}
+function renderResult(s,yest,silent){
+  document.getElementById("brumsResult").classList.remove("hidden");
+  const r=readiness(s),a=buildAnalysis(s,yest);
+  drawReticle(document.getElementById("reticle"),r);
+  const greet=readyGreeting(a.prof);
+  document.getElementById("profileTag").innerHTML=
+    `<div style="font-size:15px;color:var(--ink);font-weight:600;margin-bottom:8px">${greet}</div>`+
+    `<span class="profile-tag" style="background:${TAG_COLOR[a.prof]}22;color:${TAG_COLOR[a.prof]};border:1px solid ${TAG_COLOR[a.prof]}66">${t(a.prof)}</span>`;
+  const ss=document.getElementById("subscores");ss.innerHTML="";
+  SUBS.forEach(k=>{const v=s[k];const w=Math.round(v/SUB_MAX*100);
+    ss.innerHTML+=`<div class="subscore"><div class="k">${k}</div><div class="v">${v}</div><div class="bar"><i style="width:${w}%;background:${SUB_COLOR[k]}"></i></div></div>`;});
+  const planList=a.plan.map((x,i)=>`<label class="checkitem"><input type="checkbox" data-plan="${i}"><span>${x}</span></label>`).join("");
+  const sec=(cls,title,arr,nk,isPlan)=>{let x=`<div class="block ${cls}"><h4>${title}</h4>`;
+    if(isPlan){x+=arr.length?planList:`<p class="none">${t(nk)}</p>`;}
+    else{x+=arr.length?"<ul>"+arr.map(i=>`<li>${i}</li>`).join("")+"</ul>":`<p class="none">${t(nk)}</p>`;}return x+"</div>";};
+  document.getElementById("analysis").innerHTML=
+    sec("carry",t("aCarry"),a.carry,"noCarry")+sec("pros",t("aPros"),a.pros,"noPros")+
+    sec("cons",t("aCons"),a.cons,"noCons")+sec("plan",t("aPlan"),a.plan,"noPros",true)+recGameHtml(a.prof);
+  const rg=document.getElementById("recGameBtn");
+  if(rg)rg.addEventListener("click",()=>{showTab("games");gt(()=>launchGame(rg.dataset.g),150);});
+  document.querySelectorAll('#analysis [data-plan]').forEach(cb=>cb.addEventListener("change",()=>cb.closest(".checkitem").classList.toggle("done",cb.checked)));
+  if(!silent)document.getElementById("brumsResult").scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+
+/* ---------- AFTER-diary reflection, read back to the athlete ----------
+   Warm, specific, uses their own words. Never clinical. */
+function renderDiaryFeedback(diary){
+  const L=LANG,pick=(en,ko)=>L==="en"?en:ko;
+  const card=document.getElementById("diaryFeedback");if(!card)return;
+  const lines=[];
+  // 1. acknowledge the session honestly
+  const sess={dry:pick("dry-fire","드라이파이어"),live:pick("live","실탄"),sim:pick("match-sim","경기 시뮬"),rest:pick("recovery","회복")}[diary.sessType];
+  if(diary.routine==="every")lines.push({k:"good",t:pick("Routine held every shot — that's the foundation. Well done.","매 발 루틴 유지 — 그것이 기본입니다. 잘했어요.")});
+  else if(diary.routine==="lost")lines.push({k:"watch",t:pick("Routine got away from you today. Tomorrow, make it the first thing you lock in.","오늘 루틴이 흐트러졌어요. 내일은 가장 먼저 루틴을 고정하세요.")});
+  if(diary.reset==="fast")lines.push({k:"good",t:pick("Fast reset after a bad shot — that's a real strength under pressure.","실수 후 빠른 리셋 — 압박 속 진짜 강점입니다.")});
+  else if(diary.reset==="carried")lines.push({k:"watch",t:pick("A bad shot followed you a while today. One breath, let it go — we'll keep drilling that.","오늘 실수가 한동안 따라왔어요. 한 호흡, 흘려보내기 — 계속 연습합시다.")});
+  if(typeof diary.focus==="number"&&diary.focus>=8)lines.push({k:"good",t:pick("Focus was high — bottle that feeling and remember how it started.","집중이 높았어요 — 그 느낌을 기억하고 어떻게 시작됐는지 떠올리세요.")});
+  if(typeof diary.arousal==="number"&&diary.arousal>=8)lines.push({k:"watch",t:pick("You were quite keyed-up. For rifle, calmer and steadier usually scores better.","꽤 각성된 상태였어요. 라이플은 더 차분하고 안정적일 때 점수가 좋습니다.")});
+  // 2. mirror their best moment
+  if(diary.best)lines.push({k:"best",t:pick("Your best moment today: ","오늘 최고의 순간: ")+"\u201C"+diary.best+"\u201D"});
+  // 3. their own fix, handed back as tomorrow's focus
+  if(diary.fix)lines.push({k:"next",t:pick("Carry this into tomorrow — your words: ","내일로 이어가세요 — 당신의 말: ")+"\u201C"+diary.fix+"\u201D"});
+  // closing encouragement
+  const close=pick("Logged. This is exactly what makes tomorrow's plan yours.","기록 완료. 이것이 내일의 계획을 당신의 것으로 만듭니다.");
+
+  const icon={good:"✓",watch:"○",best:"★",next:"→"};
+  const col={good:"var(--green)",watch:"var(--amber)",best:"var(--brass)",next:"var(--glass)"};
+  card.classList.remove("hidden");
+  card.innerHTML=`<p class="eyebrow" style="color:var(--glass)">${t("fbTitle")}</p>
+    <h2 style="font-family:Oswald;margin-bottom:12px">${t("fbHead")}</h2>
+    ${lines.map(l=>`<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:9px">
+      <span style="color:${col[l.k]};font-weight:700;font-size:15px;line-height:1.3">${icon[l.k]}</span>
+      <span style="font-size:14px;color:var(--ink);line-height:1.45">${l.t}</span></div>`).join("")}
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line);font-size:13.5px;color:var(--ink2);font-style:italic">${close}</div>`;
+  card.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+
+/* ---------- streak ---------- */
+async function renderStreak(){
+  const card=document.getElementById("streakCard");if(!card)return;
+  const days=await DB.listDaysFor(SESSION.id);
+  const logged=new Set(days.filter(d=>d.brums).map(d=>d.date));
+  let streak=0;const cur=new Date();
+  for(let i=0;i<60;i++){const k=cur.toISOString().slice(0,10);
+    if(logged.has(k))streak++;else if(i>0)break; // today not yet logged shouldn't break
+    cur.setDate(cur.getDate()-1);}
+  // build last 7 dots
+  let dots="";const d2=new Date();for(let i=6;i>=0;i--){const dd=new Date();dd.setDate(dd.getDate()-i);
+    dots+=`<i class="${logged.has(dd.toISOString().slice(0,10))?"hit":""}"></i>`;}
+  card.innerHTML=`<div class="streak"><span class="flame">${streak>0?"🔥":"○"}</span>
+    <div><div class="big" style="color:${streak>0?'var(--brass)':'var(--ink3)'}">${streak} <span style="font-size:13px;font-family:Inter;font-weight:600;color:var(--ink2)">${t("streakTitle")}</span></div>
+    <div class="txt">${t("streakSub")}</div></div><div class="dots">${dots}</div></div>`;
+}
+
+/* ---------- athlete before/after restore ---------- */
+async function refreshBefore(){const d=await DB.getDay(SESSION.id,todayKey());const al=document.getElementById("alreadyBrums");
+  if(d&&d.brums){al.classList.remove("hidden");renderResult(d.brums,await DB.getDay(SESSION.id,yesterdayKey()),true);}
+  else{al.classList.add("hidden");document.getElementById("brumsResult").classList.add("hidden");}}
+async function refreshAfter(){const d=await DB.getDay(SESSION.id,todayKey());if(!(d&&d.diary))return;const dd=d.diary;
+  const setR=(n,v)=>{const el=document.querySelector(`input[name="${n}"][value="${v}"]`);if(el)el.checked=true;};
+  setR("sessType",dd.sessType);setR("routine",dd.routine);setR("reset",dd.reset);
+  if(dd.shots)document.getElementById("dShots").value=dd.shots;
+  document.getElementById("dArousal").value=dd.arousal;document.getElementById("dArousalV").textContent=dd.arousal;
+  document.getElementById("dFocus").value=dd.focus;document.getElementById("dFocusV").textContent=dd.focus;
+  document.getElementById("dBest").value=dd.best||"";document.getElementById("dBroke").value=dd.broke||"";document.getElementById("dFix").value=dd.fix||"";}
+
+/* ---------- trend + sparkline ---------- */
+function sparkline(vals){if(vals.length<2)return "";
+  const w=600,h=46,max=100,min=0;const step=w/(vals.length-1);
+  const pts=vals.map((v,i)=>[i*step,h-((v-min)/(max-min))*h]);
+  const d=pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" ");
+  const last=pts[pts.length-1];const col=scoreColor(vals[vals.length-1]);
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+    <path d="${d}" fill="none" stroke="${col}" stroke-width="2.5" vector-effect="non-scaling-stroke"/>
+    <circle cx="${last[0]}" cy="${last[1]}" r="3.5" fill="${col}"/></svg>`;}
+async function renderTrend(uid,intoEl,sparkEl){
+  const body=intoEl||document.getElementById("trendBody");
+  const spark=sparkEl||document.getElementById("trendSpark");
+  const days=await DB.listDaysFor(uid);
+  if(!days.length){if(spark)spark.innerHTML="";body.innerHTML=`<div class="empty"><b>${t("emptyTrendT")}</b>${t("emptyTrendB")}</div>`;return;}
+  const withScore=days.filter(d=>d.brums);
+  if(spark)spark.innerHTML=sparkline(withScore.slice(-14).map(d=>readiness(d.brums)));
+  const shown=days.slice(-14);
+  let rows="";shown.forEach((d,i)=>{const s=d.brums||null;const r=s?readiness(s):null;const dia=d.diary||null;
+    const prof=s?t(classify(s)):"—";const scol=r!=null?scoreColor(r):"#6B7886";
+    const rt=dia?({every:"✓✓",most:"✓",some:"△",lost:"✗"})[dia.routine]||"—":"—";
+    const rs=dia?({fast:"✓✓",slow:"△",carried:"✗",na:"—"})[dia.reset]||"—":"—";
+    const sscol=dia?({dry:"Dry",live:"Live",sim:"Sim",rest:"Rest"})[dia.sessType]||"—":"—";
+    rows+=`<tr style="cursor:pointer" data-detail="${uid}|${d.date}"><td class="day">${fmtDate(d.date)} <span style="color:var(--ink3);font-size:10px">›</span></td><td style="color:${scol};font-weight:700">${r!=null?r:"—"}</td><td>${prof}</td><td>${rt}</td><td>${rs}</td><td>${sscol}</td></tr>`;});
+  body.innerHTML=`<div class="trendwrap"><table class="hist"><thead><tr><th>${t("thDate")}</th><th>${t("thScore")}</th><th>${t("thProfile")}</th><th>${t("thRoutine")}</th><th>${t("thReset")}</th><th>${t("thSession")}</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  body.querySelectorAll("[data-detail]").forEach(tr=>tr.addEventListener("click",()=>{
+    const [u,date]=tr.dataset.detail.split("|");dayDetail(u,date);}));
+}
+
+/* ---------- full day detail (everything the athlete logged) ---------- */
+async function dayDetail(uid,date){
+  const d=await DB.getDay(uid,date);if(!d)return;
+  const s=d.brums||null,dia=d.diary||null;
+  const root=document.getElementById("modalRoot");
+  const moodRows=s?SUBS.map(k=>{const v=s[k];const w=Math.round(v/SUB_MAX*100);
+    return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:7px">
+      <span style="width:84px;font-size:12px;color:var(--ink2)">${t("mood_"+k)}</span>
+      <div style="flex:1;height:7px;border-radius:4px;background:var(--line2);position:relative;overflow:hidden"><i style="position:absolute;left:0;top:0;bottom:0;width:${w}%;background:${SUB_COLOR[k]};border-radius:4px"></i></div>
+      <span class="mono" style="width:24px;text-align:right;font-size:13px;color:var(--ink)">${v}</span></div>`;}).join(""):`<div class="empty">${t("noMood")}</div>`;
+  const r=s?readiness(s):null;
+  // free-text helper: show original + small language tag
+  const freeText=(label,val)=>{if(!val)return "";const tag=detectLang(val);
+    return `<div style="margin-bottom:11px"><div style="font-size:11px;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px">${label} <span style="border:1px solid var(--line2);border-radius:4px;padding:1px 5px;font-size:9px;color:var(--ink2);margin-left:4px">${tag}</span></div><div style="font-size:13.5px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 11px">${val}</div></div>`;};
+  let diaryHtml;
+  if(dia){
+    const sess={dry:t("sDry"),live:t("sLive"),sim:t("sSim"),rest:t("sRest")}[dia.sessType]||dia.sessType;
+    const rtn={every:t("rEvery"),most:t("rMost"),some:t("rSome"),lost:t("rLost")}[dia.routine]||dia.routine;
+    const rst={fast:t("rFast"),slow:t("rSlow"),carried:t("rCarried"),na:t("rNa")}[dia.reset]||dia.reset;
+    const stat=(lbl,val)=>`<div style="background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px 11px"><div style="font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em">${lbl}</div><div class="mono" style="font-size:15px;color:var(--ink);margin-top:2px">${val}</div></div>`;
+    diaryHtml=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+        ${stat(t("dSession"),sess)}${stat(t("dShots"),dia.shots||0)}${stat(t("dArousal"),dia.arousal+"/10")}
+        ${stat(t("dFocus"),dia.focus+"/10")}${stat(t("dRoutine"),rtn)}${stat(t("dReset"),rst)}</div>
+      ${freeText(t("dBest"),dia.best)}${freeText(t("dBroke"),dia.broke)}${freeText(t("dFix"),dia.fix)}`;
+  }else diaryHtml=`<div class="empty">${t("noDiary")}</div>`;
+  root.innerHTML=`<div class="modal"><div class="box">
+    <button class="btn ghost sm" id="closeDetail">${t("backTrend")}</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px 0 4px">
+      <h2 style="margin:0;font-family:Oswald">${fmtDate(date)}</h2>
+      ${r!=null?`<span class="profile-tag" style="background:${scoreColor(r)}22;color:${scoreColor(r)};border:1px solid ${scoreColor(r)}66">${r} · ${t(classify(s))}</span>`:""}</div>
+    <p class="eyebrow" style="margin-top:16px">${t("moodCheckTitle")}</p>${moodRows}
+    <p class="eyebrow" style="margin-top:18px">${t("sessionTitle")}</p>${diaryHtml}
+  </div></div>`;
+  document.getElementById("closeDetail").addEventListener("click",()=>root.innerHTML="");
+}
+/* crude script detection: Hangul vs Latin, for the free-text language tag */
+function detectLang(str){return /[\uAC00-\uD7A3]/.test(str)?"KO":"EN";}
+
+/* ---------- roster ---------- */
+async function rosterData(){
+  const users=(await DB.listUsers()).filter(u=>u.role==="athlete");
+  const out=[];for(const u of users){const days=await DB.listDaysFor(u.id);
+    const withB=days.filter(d=>d.brums);const last=withB[withB.length-1]||null;
+    const today=await DB.getDay(u.id,todayKey());const s=today&&today.brums?today.brums:(last?last.brums:null);
+    const r=s?readiness(s):null;const lastDate=last?last.date:null;
+    out.push({u,r,score:s,lastDate,hasToday:!!(today&&today.brums)});}
+  return out;}
+async function renderRoster(){
+  const grid=document.getElementById("rosterGrid");grid.innerHTML=`<span class="spinner"></span>`;
+  let data=await rosterData();
+  if(!data.length){grid.innerHTML=`<div class="empty"><b>${t("rosterEmptyT")}</b>${t("rosterEmptyB")}</div>`;return;}
+  // ---- squad overview: today's coverage, average, flags ----
+  const todays=data.filter(d=>d.hasToday&&d.r!=null);
+  const avgToday=todays.length?Math.round(todays.reduce((a,b)=>a+b.r,0)/todays.length):null;
+  const flagged=data.filter(d=>{if(d.r!=null&&d.r<40)return true;
+    if(!d.lastDate)return true;return daysBetween(d.lastDate,todayKey())>=3;}).length;
+  const ov=document.getElementById("squadOverview");
+  if(ov)ov.innerHTML=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">
+    <div class="ovchip"><div class="ovl">${t("ovAvg")}</div><div class="ovv" style="color:${avgToday!=null?scoreColor(avgToday):'var(--ink3)'}">${avgToday!=null?avgToday:"—"}</div></div>
+    <div class="ovchip"><div class="ovl">${t("ovLogged")}</div><div class="ovv">${todays.length}<span style="font-size:13px;color:var(--ink3)">/${data.length}</span></div></div>
+    <div class="ovchip"><div class="ovl">${t("ovFlags")}</div><div class="ovv" style="color:${flagged?'var(--amber)':'var(--green)'}">${flagged}</div></div></div>`;
+  const sort=document.getElementById("sortRoster").value;
+  if(sort==="name")data.sort((a,b)=>a.u.name<b.u.name?-1:1);
+  else if(sort==="disc")data.sort((a,b)=>(a.u.discipline||"")<(b.u.discipline||"")?-1:1);
+  else data.sort((a,b)=>{const ra=a.r==null?-1:a.r,rb=b.r==null?-1:b.r;return ra-rb;}); // needs attention first (lowest/none)
+  grid.innerHTML="";
+  data.forEach(({u,r,lastDate,hasToday})=>{
+    const discKey={rifle:"discRifle",pistol:"discPistol",shotgun:"discShotgun"}[u.discipline]||"";
+    let last;if(!lastDate)last=`<span class="stale">${t("never")}</span>`;
+    else{const gap=daysBetween(lastDate,todayKey());
+      last=gap<=0?`<span class="fresh">${t("today")}</span>`:gap===1?`<span class="stale">${t("dayAgo")}</span>`:`<span class="stale">${gap} ${t("daysAgo")}</span>`;}
+    const card=document.createElement("button");card.className="athlete-card";
+    card.innerHTML=`<div class="top"><div><div class="nm">${u.name}</div><div class="disc">${u.id} · ${discKey?t(discKey):""}</div></div>${r!=null?miniRing(r):`<span class="disc" style="color:var(--ink3)">${t("noEntry")}</span>`}</div>
+      <div class="foot"><span>${t("lastLogged")}</span>${last}</div>`;
+    card.addEventListener("click",()=>openAthlete(u));grid.appendChild(card);});
+}
+/* ============================================================
+   BACKEND ANALYSIS — interprets an athlete's full history for staff.
+   Descriptive & rule-based only. Flags and prompts, never diagnoses.
+============================================================ */
+function avg(a){return a.length?a.reduce((x,y)=>x+y,0)/a.length:null;}
+function linTrend(vals){ // slope sign over index; returns -1/0/1 and magnitude
+  if(vals.length<3)return {dir:0,slope:0};
+  const n=vals.length,xs=vals.map((_,i)=>i);
+  const mx=avg(xs),my=avg(vals);
+  let num=0,den=0;for(let i=0;i<n;i++){num+=(xs[i]-mx)*(vals[i]-my);den+=(xs[i]-mx)**2;}
+  const slope=den?num/den:0;
+  return {dir:slope>0.6?1:slope<-0.6?-1:0,slope};
+}
+async function analyseAthlete(uid){
+  const days=(await DB.listDaysFor(uid));
+  const withB=days.filter(d=>d.brums);
+  const L=LANG,pick=(en,ko)=>L==="en"?en:ko;
+  const out={summary:[],flags:[],focus:[],stats:null,enough:withB.length>=3};
+  if(withB.length===0)return out;
+
+  const scores=withB.map(d=>readiness(d.brums));
+  const recent=withB.slice(-7);
+  const recentScores=recent.map(d=>readiness(d.brums));
+  const mean=Math.round(avg(scores));
+  const meanRecent=Math.round(avg(recentScores));
+  const best=Math.max(...scores),worst=Math.min(...scores);
+  const variability=Math.round(Math.sqrt(avg(scores.map(v=>(v-avg(scores))**2))));
+  const tr=linTrend(recentScores);
+
+  // week-over-week: this week's logged entries vs the previous week's
+  const wkNow=new Date();const wk7=new Date();wk7.setDate(wk7.getDate()-7);const wk14=new Date();wk14.setDate(wk14.getDate()-14);
+  const thisWk=withB.filter(d=>new Date(d.date)>=wk7).map(d=>readiness(d.brums));
+  const prevWk=withB.filter(d=>{const dd=new Date(d.date);return dd>=wk14&&dd<wk7;}).map(d=>readiness(d.brums));
+  let wkDelta=null;
+  if(thisWk.length>=2&&prevWk.length>=2)wkDelta=Math.round(avg(thisWk)-avg(prevWk));
+
+  // which mood factor dominates the "bad" side (avg of negatives, low V)
+  const mAvg={};SUBS.forEach(k=>mAvg[k]=avg(withB.map(d=>d.brums[k])));
+  const negDrivers=[["F",mAvg.F],["T",mAvg.T],["A",mAvg.A],["D",mAvg.D],["C",mAvg.C]].sort((a,b)=>b[1]-a[1]);
+  const topDriver=negDrivers[0];
+  const lowV=mAvg.V<2;
+
+  // routine / reset reliability (diary)
+  const diaries=days.filter(d=>d.diary).map(d=>d.diary);
+  const rTotal=diaries.length;
+  const routineHeld=diaries.filter(d=>d.routine==="every").length;
+  const resetFast=diaries.filter(d=>d.reset==="fast").length;
+  const routinePct=rTotal?Math.round(routineHeld/rTotal*100):null;
+  const resetPct=rTotal?Math.round(resetFast/rTotal*100):null;
+
+  // compliance: gaps in logging
+  let lastDate=withB[withB.length-1].date;
+  const gapToday=daysBetween(lastDate,todayKey());
+
+  out.stats={mean,meanRecent,best,worst,variability,n:withB.length,routinePct,resetPct,
+    driver:topDriver[0],lowV,trendDir:tr.dir,gapToday};
+
+  // ---- SUMMARY (plain language) ----
+  if(tr.dir>0)out.summary.push(pick(`Readiness is trending up over the last ${recent.length} sessions (now ~${meanRecent}).`,`최근 ${recent.length}회 준비도가 상승 중 (현재 ~${meanRecent}).`));
+  else if(tr.dir<0)out.summary.push(pick(`Readiness is trending down over the last ${recent.length} sessions (now ~${meanRecent}).`,`최근 ${recent.length}회 준비도가 하락 중 (현재 ~${meanRecent}).`));
+  else out.summary.push(pick(`Readiness is broadly stable (recent ~${meanRecent}, overall ~${mean}).`,`준비도는 대체로 안정적 (최근 ~${meanRecent}, 전체 ~${mean}).`));
+
+  out.summary.push(pick(`Typical ${mean}/100, ranging ${worst}–${best}. Day-to-day swing is ${variability<8?"low":variability<15?"moderate":"high"}.`,`평균 ${mean}/100, 범위 ${worst}–${best}. 일간 변동은 ${variability<8?"낮음":variability<15?"보통":"높음"}.`));
+  if(wkDelta!=null){
+    const arrow=wkDelta>2?"▲":wkDelta<-2?"▼":"▬";
+    out.summary.push(pick(`Week-over-week: ${arrow} ${wkDelta>0?"+":""}${wkDelta} vs last week (${Math.round(avg(thisWk))} vs ${Math.round(avg(prevWk))}).`,`주간 비교: ${arrow} ${wkDelta>0?"+":""}${wkDelta} (이번 주 ${Math.round(avg(thisWk))} vs 지난주 ${Math.round(avg(prevWk))}).`));
+    if(wkDelta<=-8)out.flags.push({lvl:"amber",txt:pick(`Readiness dropped ${Math.abs(wkDelta)} points week-over-week — check load, sleep, or life stress.`,`주간 준비도 ${Math.abs(wkDelta)}점 하락 — 부하·수면·생활 스트레스 점검.`)});
+  }
+
+  // week-over-week: last 7 logged vs previous 7 logged
+  if(withB.length>=8){
+    const lastN=withB.slice(-7).map(d=>readiness(d.brums));
+    const prevN=withB.slice(-14,-7).map(d=>readiness(d.brums));
+    if(prevN.length>=3){
+      const dw=Math.round(avg(lastN)-avg(prevN));
+      if(Math.abs(dw)>=4)out.summary.push(pick(`Week-over-week: ${dw>0?"up":"down"} ${Math.abs(dw)} points vs the previous block${dw<0?" — worth asking what changed":""}.`,`주간 비교: 직전 구간 대비 ${Math.abs(dw)}점 ${dw>0?"상승":"하락"}${dw<0?" — 무엇이 달라졌는지 확인 필요":""}.`));
+      else out.summary.push(pick("Week-over-week: holding steady vs the previous block.",`주간 비교: 직전 구간과 비슷하게 유지.`));
+    }
+  }
+
+  // dominant driver
+  const driverName={F:pick("tiredness","피로"),T:pick("stress","긴장"),A:pick("anger","분노"),D:pick("low mood","기분 저하"),C:pick("a foggy head","머리 복잡")}[topDriver[0]];
+  if(topDriver[1]>=2.2)out.summary.push(pick(`When readiness dips, it's mostly down to ${driverName}.`,`준비도가 떨어질 때 주로 ${driverName} 때문입니다.`));
+  if(lowV)out.summary.push(pick("Energy runs low on average — watch for not recovering enough.",`에너지가 평균적으로 낮음 — 회복 부족 주의.`));
+
+  if(routinePct!=null)out.summary.push(pick(`Pre-shot routine held every shot in ${routinePct}% of logged sessions; fast reset in ${resetPct}%.`,`사전 루틴을 매 발 유지한 세션 ${routinePct}%, 빠른 리셋 ${resetPct}%.`));
+
+  // mind-game practice (last 7 calendar days)
+  const wk=todayKey();const cutoff=new Date();cutoff.setDate(cutoff.getDate()-7);
+  const gameDays=days.filter(d=>d.games&&Object.keys(d.games).length&&new Date(d.date)>=cutoff);
+  const breathDays=gameDays.filter(d=>d.games.breath).length;
+  if(gameDays.length)out.summary.push(pick(`Mind-game practice on ${gameDays.length} of the last 7 days${breathDays?` (breathing ×${breathDays})`:""} — the skills are being trained.`,`최근 7일 중 ${gameDays.length}일 멘탈 게임 연습${breathDays?` (호흡 ×${breathDays})`:""} — 기술을 훈련 중.`));
+  else if(days.some(d=>d.games))out.summary.push(pick("No mind-game practice this week — worth a nudge if stress or reset is the focus.",`이번 주 멘탈 게임 연습 없음 — 긴장·리셋이 초점이라면 권유해 볼 만함.`));
+
+  // ---- FLAGS (amber/red) ----
+  if(gapToday>=3)out.flags.push({lvl:"red",txt:pick(`No log for ${gapToday} days — athlete may have dropped off.`,`${gapToday}일간 기록 없음 — 이탈 가능성.`)});
+  if(tr.dir<0&&meanRecent<55)out.flags.push({lvl:"red",txt:pick("Sustained downward readiness into the low zone — check in directly.",`준비도가 낮은 구간으로 지속 하락 — 직접 면담 권장.`)});
+  if(mAvg.F>=3)out.flags.push({lvl:"amber",txt:pick("Tiredness is consistently high — review training load and sleep.",`피로가 지속적으로 높음 — 훈련 부하·수면 점검.`)});
+  if(resetPct!=null&&resetPct<50&&rTotal>=3)out.flags.push({lvl:"amber",txt:pick("Reset after a bad shot is often slow or carried over — a clear thing to work on.",`실수 후 리셋이 자주 느리거나 이어짐 — 명확한 개입 대상.`)});
+  if(routinePct!=null&&routinePct<50&&rTotal>=3)out.flags.push({lvl:"amber",txt:pick("Routine consistency is slipping across sessions — reinforce the pre-shot routine.",`세션 전반 루틴 일관성 저하 — 사전 루틴 강화.`)});
+  if(variability>=15)out.flags.push({lvl:"amber",txt:pick("Big day-to-day swings — an up-and-down period; steady them before high-pressure work.",`일간 변동 큼 — 기복이 큰 시기; 고압 작업 전 안정화.`)});
+
+  // ---- SUGGESTED FOCUS (prompts for the psychologist) ----
+  if(topDriver[0]==="F"&&mAvg.F>=2.5)out.focus.push(pick("Work on recovery, sleep, and session length — tiredness is the main lever.",`회복·수면·세션 길이 — 피로가 핵심 지렛대.`));
+  if(topDriver[0]==="T"&&mAvg.T>=2.5)out.focus.push(pick("Bring breathing and calming work forward in the routine.",`호흡·진정 작업을 루틴 앞쪽으로.`));
+  if(resetPct!=null&&resetPct<60)out.focus.push(pick("Practise bad-shot reset on purpose.",`의도적 실수-후 리셋 훈련.`));
+  if(routinePct!=null&&routinePct<70)out.focus.push(pick("Standardise and rehearse the pre-shot routine until it's automatic.",`사전 루틴 표준화·자동화 연습.`));
+  if(!out.focus.length)out.focus.push(pick("Pattern looks healthy — maintain and progress load as planned.",`패턴 양호 — 유지하며 계획대로 부하 증가.`));
+
+  return out;
+}
+function analysisHtml(a){
+  if(!a.enough)return `<div class="empty">${t("anNeedMore")}</div>`;
+  const st=a.stats;
+  const statChip=(lbl,val,col)=>`<div style="background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px 10px;text-align:center"><div style="font-size:9px;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em">${lbl}</div><div class="mono" style="font-size:17px;color:${col||'var(--ink)'};margin-top:1px">${val}</div></div>`;
+  const trIcon=st.trendDir>0?"▲":st.trendDir<0?"▼":"▬";
+  const trCol=st.trendDir>0?"var(--green)":st.trendDir<0?"var(--red)":"var(--ink2)";
+  let html=`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px">
+    ${statChip(t("anAvg"),st.mean,scoreColor(st.mean))}
+    ${statChip(t("anRecent"),st.meanRecent,scoreColor(st.meanRecent))}
+    ${statChip(t("anTrend"),`<span style="color:${trCol}">${trIcon}</span>`)}
+    ${statChip(t("anRange"),st.worst+"–"+st.best)}</div>`;
+  html+=`<div style="font-size:13.5px;color:var(--ink2);line-height:1.5;margin-bottom:14px">`+
+    a.summary.map(x=>`<div style="margin-bottom:5px;padding-left:16px;position:relative"><span style="position:absolute;left:0;color:var(--ink3)">›</span>${x}</div>`).join("")+`</div>`;
+  if(a.flags.length){html+=`<div style="margin-bottom:14px">`+a.flags.map(f=>{
+    const c=f.lvl==="red"?"var(--red)":"var(--amber)";
+    return `<div style="display:flex;gap:8px;align-items:flex-start;background:${c}14;border:1px solid ${c}55;border-radius:8px;padding:9px 11px;margin-bottom:7px"><span style="color:${c};font-weight:700">!</span><span style="font-size:13px;color:var(--ink)">${f.txt}</span></div>`;
+  }).join("")+`</div>`;}
+  html+=`<div style="background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:11px 13px">
+    <div style="font-size:11px;color:var(--brass);text-transform:uppercase;letter-spacing:.1em;font-weight:700;margin-bottom:6px">${t("anFocus")}</div>`+
+    a.focus.map(x=>`<div style="font-size:13px;color:var(--ink2);margin-bottom:4px;padding-left:16px;position:relative"><span style="position:absolute;left:0;color:var(--brass)">→</span>${x}</div>`).join("")+`</div>`;
+  html+=`<div style="font-size:10.5px;color:var(--ink3);font-style:italic;margin-top:10px">${t("anDisclaimer")}</div>`;
+  if(AI.enabled&&!AI.apiKey.startsWith("PASTE_"))
+    html+=`<div class="btnrow" style="margin-top:10px"><button class="btn ghost sm" id="aiInsightBtn">✦ ${t("aiBtn")}</button></div><div id="aiInsightOut"></div>`;
+  return html;
+}
+
+async function openAthlete(u){
+  const root=document.getElementById("modalRoot");
+  const today=await DB.getDay(u.id,todayKey());const s=today&&today.brums?today.brums:null;
+  const notes=await DB.listNotes(u.id);const canNote=SESSION.role==="coach"||SESSION.role==="admin";
+  const discKey={rifle:"discRifle",pistol:"discPistol",shotgun:"discShotgun"}[u.discipline]||"";
+  let readyHtml;
+  if(s){const r=readiness(s),a=buildAnalysis(s,await DB.getDay(u.id,yesterdayKey()));
+    readyHtml=`<div class="readout"><div class="reticle" id="mReticle"></div><div class="meta">
+      <span class="profile-tag" style="background:${TAG_COLOR[a.prof]}22;color:${TAG_COLOR[a.prof]};border:1px solid ${TAG_COLOR[a.prof]}66">${t(a.prof)}</span>
+      <div style="font-size:12.5px;margin-top:10px"><b style="color:var(--brass)">${t("aPlan")}</b><ul style="margin:6px 0 0;padding-left:18px;color:var(--ink2)">${a.plan.map(x=>`<li>${x}</li>`).join("")}</ul></div></div></div>`;
+  }else readyHtml=`<div class="empty">${t("noEntry")}</div>`;
+  // notes visible to athlete filter handled at render; staff see all
+  const noteHtml=notes.length?notes.map(n=>`<div class="note"><div class="nh"><span class="by">${n.by}</span><span>${n.private?`<span class="priv">${t("privLbl")}</span>`:""} ${fmtDate((n.at||todayKey()).slice(0,10))}</span></div><div class="body">${n.text}</div></div>`).join(""):`<div class="empty"><b>${t("noNotesT")}</b>${t("noNotesB")}</div>`;
+  // backend analysis (staff only)
+  const analysis=await analyseAthlete(u.id);
+  root.innerHTML=`<div class="modal"><div class="box">
+    <button class="btn ghost sm" id="closeModal">${t("back")}</button>
+    <h2 style="margin:14px 0 2px;font-family:Oswald">${u.name}</h2>
+    <div class="disc" style="font-family:JetBrains Mono;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)">${u.id} · ${discKey?t(discKey):""}</div>
+    <p class="eyebrow" style="margin-top:18px">${t("readiness")}</p>${readyHtml}
+    <p class="eyebrow" style="margin-top:20px;color:var(--brass)">${t("anTitle")}</p>${analysisHtml(analysis)}
+    <p class="eyebrow" style="margin-top:20px">${t("ebTrend")}</p><div id="mSpark"></div><div id="mTrend"></div>
+    <p class="eyebrow" style="margin-top:20px">${t("notesTitle")}</p><div id="mNotes">${noteHtml}</div>
+    ${canNote?`<div class="field" style="margin-top:12px"><textarea id="noteText" rows="2" placeholder="${t("notePlace")}"></textarea></div>
+      <label class="checkitem" style="margin-bottom:10px"><input type="checkbox" id="notePrivate" checked><span>${t("privLbl")} <span style="color:var(--ink3)">(${t("privToggle")} = off)</span></span></label>
+      <div class="btnrow"><button class="btn sm" id="addNote">${t("noteAdd")}</button></div>`:""}
+  </div></div>`;
+  if(s)drawReticle(document.getElementById("mReticle"),readiness(s));
+  renderTrend(u.id,document.getElementById("mTrend"),document.getElementById("mSpark"));
+  document.getElementById("closeModal").addEventListener("click",()=>root.innerHTML="");
+  const aiBtn=document.getElementById("aiInsightBtn");
+  if(aiBtn)aiBtn.addEventListener("click",()=>aiInsight(u,analysis));
+  if(canNote)document.getElementById("addNote").addEventListener("click",async()=>{
+    const txt=document.getElementById("noteText").value.trim();if(!txt)return;
+    await DB.addNote(u.id,{text:txt,by:SESSION.name,at:new Date().toISOString(),private:document.getElementById("notePrivate").checked});
+    toast(t("created"));openAthlete(u);});
+}
+
+/* Optional Claude insight — sends the descriptive stats (no free-text) and asks
+   for practical prompts. Staff-side only; see AI config caveat above. */
+async function aiInsight(u,a){
+  const out=document.getElementById("aiInsightOut");if(!out||!a.enough)return;
+  out.innerHTML=`<div class="empty">${t("aiThinking")}</div>`;
+  const st=a.stats;
+  const prompt=`You are assisting a sport psychologist reviewing a precision-shooting athlete's self-report monitoring data. Descriptive stats: average readiness ${st.mean}/100, recent ${st.meanRecent}, range ${st.worst}-${st.best}, variability ${st.variability}, trend ${st.trendDir>0?"up":st.trendDir<0?"down":"flat"}, dominant negative mood factor "${st.driver}" (T=stress,D=low mood,A=anger,F=tiredness,C=confusion), routine held ${st.routinePct??"n/a"}%, fast reset ${st.resetPct??"n/a"}%, days since last log ${st.gapToday}. Rule-based flags: ${a.flags.map(f=>f.txt).join("; ")||"none"}. In under 120 words, plain English, give the psychologist 2-3 practical prompts or hypotheses to explore with this athlete. Never diagnose; frame as questions to consider.`;
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",
+      headers:{"Content-Type":"application/json","x-api-key":AI.apiKey,
+        "anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:AI.model,max_tokens:400,messages:[{role:"user",content:prompt}]})});
+    const data=await r.json();
+    const txt=(data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n")||t("aiFail");
+    out.innerHTML=`<div style="background:var(--bg);border:1px solid var(--line2);border-radius:10px;padding:12px 14px;margin-top:10px;font-size:13px;color:var(--ink2);line-height:1.5;white-space:pre-wrap">✦ ${txt}</div><div style="font-size:10px;color:var(--ink3);font-style:italic;margin-top:5px">${t("aiDisc")}</div>`;
+  }catch(e){out.innerHTML=`<div class="empty">${t("aiFail")}</div>`;}
+}
+
+/* ---------- accounts ---------- */
+async function renderAccounts(){
+  const tbl=document.getElementById("accountsTable");const users=await DB.listUsers();
+  const rl={athlete:t("rAthlete"),coach:t("rCoach"),admin:t("rAdmin")};
+  const dl={rifle:t("discRifle"),pistol:t("discPistol"),shotgun:t("discShotgun"),"":"—"};
+  let rows=`<thead><tr><th>${t("colId")}</th><th>${t("colName")}</th><th>${t("colRole")}</th><th>${t("colDisc")}</th><th>${t("colPass")}</th><th>${t("colAct")}</th></tr></thead><tbody>`;
+  users.sort((a,b)=>a.role<b.role?-1:1).forEach(u=>{const canDel=u.id!=="admin";
+    rows+=`<tr><td class="day">${u.id}</td><td style="font-family:Inter">${u.name}</td><td>${rl[u.role]||u.role}</td><td>${dl[u.discipline||""]||"—"}</td>
+      <td><input type="text" value="${u.pass}" maxlength="4" data-pass="${u.id}" style="width:64px;padding:5px;text-align:center;font-family:JetBrains Mono"></td>
+      <td>${canDel?`<button class="btn danger sm" data-del="${u.id}">${t("del")}</button>`:"—"}</td></tr>`;});
+  tbl.innerHTML=rows+"</tbody>";
+  tbl.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",async()=>{await DB.deleteUser(b.dataset.del);toast(t("deleted"));renderAccounts();}));
+  tbl.querySelectorAll("[data-pass]").forEach(inp=>inp.addEventListener("change",async()=>{
+    if(!/^\d{4}$/.test(inp.value)){renderAccounts();return;}
+    await DB.setUser(inp.dataset.pass,{pass:inp.value});toast(t("updated"));}));
+}
+function openNewAccount(){const root=document.getElementById("modalRoot");
+  root.innerHTML=`<div class="modal"><div class="box"><h2 style="margin:0 0 16px;font-family:Oswald">${t("newAccount")}</h2>
+    <div class="field"><label class="q">${t("fName")}</label><input type="text" id="aName"></div>
+    <div class="field"><label class="q">${t("fId")}</label><input type="text" id="aId" placeholder="RIF02"></div>
+    <div class="field"><label class="q">${t("fRole")}</label><select id="aRole"><option value="athlete">${t("rAthlete")}</option><option value="coach">${t("rCoach")}</option><option value="admin">${t("rAdmin")}</option></select></div>
+    <div class="field" id="discWrap"><label class="q">${t("fDisc")}</label><select id="aDisc"><option value="rifle">${t("discRifle")}</option><option value="pistol">${t("discPistol")}</option><option value="shotgun">${t("discShotgun")}</option></select></div>
+    <div class="field"><label class="q">${t("fPass")}</label><input type="text" id="aPass" class="pininput" maxlength="4" inputmode="numeric" placeholder="0000"></div>
+    <div class="err" id="aErr"></div>
+    <div class="btnrow"><button class="btn" id="aCreate">${t("create")}</button><button class="btn ghost" id="aCancel">${t("cancel")}</button></div></div></div>`;
+  const roleSel=document.getElementById("aRole"),discWrap=document.getElementById("discWrap");
+  roleSel.addEventListener("change",()=>discWrap.style.display=roleSel.value==="athlete"?"block":"none");
+  document.getElementById("aCancel").addEventListener("click",()=>root.innerHTML="");
+  document.getElementById("aCreate").addEventListener("click",async()=>{
+    const name=document.getElementById("aName").value.trim(),id=document.getElementById("aId").value.trim();
+    const role=roleSel.value,disc=role==="athlete"?document.getElementById("aDisc").value:"";
+    const pass=document.getElementById("aPass").value.trim(),err=document.getElementById("aErr");
+    if(!name||!id||!/^\d{4}$/.test(pass)){err.textContent=t("saveFirst");return;}
+    if(await DB.getUser(id)){err.textContent=t("idTaken");return;}
+    await DB.setUser(id,{name,role,pass,discipline:disc});root.innerHTML="";toast(t("created"));renderAccounts();});
+}
+
+/* ---------- CSV ---------- */
+function csvCell(v){if(v==null)v="";v=String(v);if(/[",\n]/.test(v))v='"'+v.replace(/"/g,'""')+'"';return v;}
+async function exportSquadCsv(){
+  const users=(await DB.listUsers()).filter(u=>u.role==="athlete");
+  const headers=["AthleteID","Name","Discipline","Date","Readiness","Profile","Stress","LowMood","Anger","Energy","Tiredness","Confusion","TMD","Session","Shots","WoundUp","Focus","Routine","Reset","Best","Broke","Fix"];
+  const lines=[headers.join(",")];
+  for(const u of users){const days=await DB.listDaysFor(u.id);
+    for(const d of days){const s=d.brums,dia=d.diary||{};const prof=s?t(classify(s)):"";
+      lines.push([u.id,u.name,u.discipline,d.date,s?readiness(s):"",prof,s?s.T:"",s?s.D:"",s?s.A:"",s?s.V:"",s?s.F:"",s?s.C:"",s?tmd(s):"",
+        dia.sessType||"",dia.shots||"",dia.arousal??"",dia.focus??"",dia.routine||"",dia.reset||"",dia.best||"",dia.broke||"",dia.fix||""].map(csvCell).join(","));}}
+  const blob=new Blob(["\uFEFF"+lines.join("\r\n")],{type:"text/csv;charset=utf-8;"});
+  const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="shotmind_squad_"+todayKey()+".csv";
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);toast(t("exported"));
+}
+
+/* ---------- demo data (brief 0-4 scale) ---------- */
+function demoArc(){return [
+  {off:10,b:{T:1,D:0,A:0,V:4,F:1,C:0},d:{sessType:"live",shots:120,arousal:4,focus:8,routine:"every",reset:"fast",best:"Clean inner 10s in series 3.",broke:"Slight pull on last shot.",fix:"Hold the pause one beat longer."}},
+  {off:9,b:{T:1,D:0,A:0,V:4,F:1,C:0},d:{sessType:"sim",shots:100,arousal:5,focus:7,routine:"every",reset:"fast",best:"Calm through the sim final.",broke:"Crowd noise once.",fix:"Cue word every shot in finals."}},
+  {off:8,b:{T:2,D:1,A:1,V:3,F:2,C:1},d:{sessType:"live",shots:140,arousal:6,focus:6,routine:"most",reset:"slow",best:"Good early groups.",broke:"Tired late, hold wavered.",fix:"Shorten before fatigue."}},
+  {off:7,b:{T:3,D:2,A:2,V:2,F:4,C:2},d:{sessType:"live",shots:150,arousal:7,focus:4,routine:"some",reset:"carried",best:"Pushed through.",broke:"Heavy legs, mind wandered.",fix:"Cut volume, protect routine."}},
+  {off:6,b:{T:2,D:2,A:1,V:1,F:3,C:2},d:{sessType:"rest",shots:0,arousal:3,focus:5,routine:"every",reset:"na",best:"Recovery day.",broke:"",fix:"Sleep earlier."}},
+  {off:5,b:{T:1,D:1,A:0,V:3,F:2,C:0},d:{sessType:"dry",shots:60,arousal:4,focus:7,routine:"every",reset:"fast",best:"Routine automatic on dry-fire.",broke:"",fix:"Carry rhythm to live."}},
+  {off:4,b:{T:1,D:0,A:0,V:4,F:1,C:0},d:{sessType:"live",shots:110,arousal:4,focus:8,routine:"every",reset:"fast",best:"Quiet final fixation.",broke:"One flyer.",fix:"Reset breath before re-mount."}},
+  {off:3,b:{T:2,D:0,A:1,V:3,F:1,C:1},d:{sessType:"sim",shots:100,arousal:6,focus:7,routine:"most",reset:"slow",best:"Strong qualification sim.",broke:"Tightened at final transition.",fix:"Rehearse qual-to-final reset."}},
+  {off:2,b:{T:1,D:0,A:0,V:4,F:1,C:0},d:{sessType:"live",shots:120,arousal:5,focus:8,routine:"every",reset:"fast",best:"Instant reset after bad shot.",broke:"",fix:"Keep routine identical under pressure."}},
+  {off:1,b:{T:1,D:0,A:0,V:4,F:0,C:0},d:{sessType:"sim",shots:100,arousal:4,focus:9,routine:"every",reset:"fast",best:"Best focus of the block.",broke:"",fix:"Trust the process at the Games."}}
+];}
+async function loadDemoData(){
+  const users=(await DB.listUsers()).filter(u=>u.role==="athlete");
+  for(const u of users){const arc=demoArc();const j=u.discipline==="shotgun"?1:0;
+    for(const r of arc){const dt=new Date();dt.setDate(dt.getDate()-r.off);const key=dt.toISOString().slice(0,10);
+      const b={...r.b,F:Math.max(0,Math.min(SUB_MAX,r.b.F+j))};
+      await DB.setDay(u.id,key,{brums:b,brumsAt:dt.toISOString(),diary:{...r.d,at:dt.toISOString()}});}}
+  toast(t("demoLoaded"));renderRoster();
+}
+/* load the demo arc for the currently logged-in athlete only, then refresh their trend */
+async function loadDemoSelf(){
+  if(!SESSION)return;const arc=demoArc();
+  for(const r of arc){const dt=new Date();dt.setDate(dt.getDate()-r.off);const key=dt.toISOString().slice(0,10);
+    await DB.setDay(SESSION.id,key,{brums:r.b,brumsAt:dt.toISOString(),diary:{...r.d,at:dt.toISOString()}});}
+  toast(t("demoLoaded"));renderTrend(SESSION.id);renderStreak();
+}
+
+/* ---------- auth ---------- */
+/* ============================================================
+   MIND GAMES — trains calm, focus, recovery. Scores saved to record.
+============================================================ */
+const GAMES=[
+  {id:"breath",icon:"🫁",nEn:"Box Breathing",nKo:"박스 호흡",dEn:"Calm your arousal with a 4-4-4-4 pacer.",dKo:"4-4-4-4 호흡으로 진정."},
+  {id:"stroop",icon:"🎨",nEn:"Stroop Match",nKo:"스트룹 매치",dEn:"Tap the ink colour, not the word — ignore the distraction.",dKo:"글자가 아니라 잉크 색을 탭 — 방해를 무시."},
+  {id:"reset",icon:"🔄",nEn:"Reaction & Reset",nKo:"반응·리셋",dEn:"Hit targets, and reset fast after a 'bad shot'.",dKo:"타깃 명중, '실수' 후 빠른 리셋."},
+  {id:"grid",icon:"🔢",nEn:"Concentration Grid",nKo:"집중 그리드",dEn:"Find 1 → 25 in order. Classic focus drill — 60 seconds.",dKo:"1 → 25 순서대로 찾기. 클래식 집중 훈련 — 60초."},
+  {id:"seq",icon:"🧠",nEn:"Sequence Memory",nKo:"순서 기억",dEn:"Repeat the growing pattern — stay composed.",dKo:"길어지는 패턴 반복 — 침착하게."},
+];
+
+async function gameBest(gid){
+  const days=await DB.listDaysFor(SESSION.id);let best=0;
+  days.forEach(d=>{if(d.games&&typeof d.games[gid]==="number")best=Math.max(best,d.games[gid]);});
+  return best;
+}
+async function saveGameScore(gid,score){
+  const tk=todayKey();const d=await DB.getDay(SESSION.id,tk)||{};
+  const games=d.games||{};
+  games[gid]=Math.max(games[gid]||0,score); // keep best today
+  await DB.setDay(SESSION.id,tk,{games});
+}
+
+async function renderGames(){
+  const grid=document.getElementById("gamesGrid");grid.innerHTML="";
+  document.getElementById("gameStage").innerHTML="";
+  for(const g of GAMES){
+    const best=await gameBest(g.id);
+    const tile=document.createElement("button");tile.className="gametile";
+    tile.innerHTML=`<span class="gi">${g.icon}</span>
+      <span class="gn">${LANG==="en"?g.nEn:g.nKo}</span>
+      <span class="gd">${LANG==="en"?g.dEn:g.dKo}</span>
+      <span class="gbest">${best?t("gBest")+": "+best:t("gNew")}</span>`;
+    tile.addEventListener("click",()=>launchGame(g.id));
+    grid.appendChild(tile);
+  }
+}
+function gameShell(titleEn,titleKo,subEn,subKo,innerHtml){
+  const stage=document.getElementById("gameStage");
+  stage.innerHTML=`<div class="gamebox">
+    <h3>${LANG==="en"?titleEn:titleKo}</h3>
+    <div class="gsub">${LANG==="en"?subEn:subKo}</div>
+    ${innerHtml}
+    <div class="btnrow" style="justify-content:center;margin-top:6px">
+      <button class="btn ghost sm" id="gExit">${t("gExit")}</button></div>
+  </div>`;
+  stage.scrollIntoView({behavior:"smooth",block:"nearest"});
+  document.getElementById("gExit").addEventListener("click",()=>{cancelGame();document.getElementById("gameStage").innerHTML="";renderGames();});
+}
+let GAME_TIMERS=[];
+function gt(fn,ms){const id=setTimeout(fn,ms);GAME_TIMERS.push(id);return id;}
+function gi(fn,ms){const id=setInterval(fn,ms);GAME_TIMERS.push(id);return id;}
+function cancelGame(){GAME_TIMERS.forEach(clearTimeout);GAME_TIMERS.forEach(clearInterval);GAME_TIMERS=[];}
+
+function launchGame(id){cancelGame();
+  if(id==="breath")game_breath();
+  else if(id==="stroop")game_stroop();
+  else if(id==="reset")game_reset();
+  else if(id==="grid")game_grid();
+  else if(id==="seq")game_seq();
+}
+async function finishGame(gid,score,msgEn,msgKo){
+  if(navigator.vibrate)navigator.vibrate([40,60,40]);
+  await saveGameScore(gid,score);
+  const stage=document.querySelector(".gamebox");if(!stage)return;
+  const area=stage.querySelector(".gamearea")||stage.querySelector(".seqgrid");
+  if(area)area.style.display="none";
+  const res=document.createElement("div");res.className="gresult";
+  res.innerHTML=`<div class="gscore" style="color:var(--glass)">${score}</div>
+    <div style="font-size:13px;color:var(--ink2);margin-top:4px">${LANG==="en"?msgEn:msgKo}</div>
+    <div style="font-size:11px;color:var(--ink3);margin-top:6px">${t("gSaved")}</div>`;
+  stage.insertBefore(res,stage.querySelector(".btnrow"));
+  const again=document.createElement("button");again.className="btn sm";again.textContent=t("gAgain");
+  again.addEventListener("click",()=>launchGame(gid));
+  stage.querySelector(".btnrow").prepend(again);
+}
+
+/* 1 · BOX BREATHING — score = cycles completed */
+function game_breath(){
+  gameShell("Box Breathing","박스 호흡","Follow the orb. In · hold · out · hold — 4 seconds each.","오브를 따라가세요. 들이쉬기·멈춤·내쉬기·멈춤 각 4초.",
+    `<div class="gamearea"><div class="breathorb" id="orb" style="width:90px;height:90px">—</div></div>
+     <div class="gmsg" id="bMsg"></div>`);
+  const orb=document.getElementById("orb"),msg=document.getElementById("bMsg");
+  const phases=[["In",1,90,150],["Hold",0,150,150],["Out",1,150,90],["Hold",0,90,90]];
+  const phaseKo=["들이쉬기","멈춤","내쉬기","멈춤"];
+  let p=0,cycles=0,target=4;
+  function step(){
+    const [lbl,,from,to]=phases[p];orb.textContent=LANG==="en"?lbl:phaseKo[p];
+    orb.style.transition="none";orb.style.width=from+"px";orb.style.height=from+"px";
+    requestAnimationFrame(()=>{orb.style.transition="all 4s ease-in-out";orb.style.width=to+"px";orb.style.height=to+"px";});
+    msg.textContent=(LANG==="en"?"Cycle ":"사이클 ")+(cycles+1)+" / "+target;
+    gt(()=>{p=(p+1)%4;if(p===0){cycles++;if(cycles>=target){finishGame("breath",cycles*25,"Well paced. That's how you settle on the line.","좋은 페이스. 사선에서 이렇게 안정시키세요.");return;}}step();},4000);
+  }
+  step();
+}
+
+/* 2 · STROOP MATCH — tap the ink colour, not the word; trains selective attention */
+function game_stroop(){
+  const COLS=[["#EF4444","Red","빨강"],["#22C55E","Green","초록"],["#3B82F6","Blue","파랑"],["#F59E0B","Yellow","노랑"]];
+  gameShell("Stroop Match","스트룹 매치","Tap the colour of the INK, not what the word says. Like ignoring crowd noise at the line.","글자의 뜻이 아니라 잉크 색을 탭하세요. 사선에서 소음을 무시하듯.",
+    `<div class="gamearea" id="stArea" style="flex-direction:column;gap:8px">
+       <div id="stWord" style="font-family:Oswald;font-size:52px;font-weight:700;letter-spacing:.04em"></div>
+       <div id="stSub" style="font-size:12px;color:var(--ink3)"></div></div>
+     <div class="stroopbtns">${COLS.map((c,i)=>`<button class="stroopbtn" data-i="${i}" style="background:${c[0]}"></button>`).join("")}</div>
+     <div class="gmsg" id="stMsg"></div>`);
+  const word=document.getElementById("stWord"),sub=document.getElementById("stSub"),msg=document.getElementById("stMsg");
+  let round=0,score=0,total=14,inkIdx=0,shownAt=0,done=false;
+  function next(){
+    if(round>=total){done=true;finishGame("stroop",Math.max(0,Math.round(score)),"Sharp filtering — you answered the target, not the noise.","날카로운 선별 — 소음이 아니라 목표에 반응했습니다.");return;}
+    round++;
+    const wordIdx=Math.floor(Math.random()*4);
+    inkIdx=Math.random()<0.7?(wordIdx+1+Math.floor(Math.random()*3))%4:wordIdx; // 70% incongruent
+    word.textContent=LANG==="en"?COLS[wordIdx][1].toUpperCase():COLS[wordIdx][2];
+    word.style.color=COLS[inkIdx][0];
+    sub.textContent=(LANG==="en"?"ink colour?":"잉크 색은?");
+    msg.textContent=(LANG==="en"?"Round ":"라운드 ")+round+" / "+total+"  ·  "+Math.max(0,Math.round(score));
+    shownAt=Date.now();
+  }
+  document.querySelectorAll(".stroopbtn").forEach(b=>b.addEventListener("click",()=>{
+    if(done)return;const i=+b.dataset.i;const rt=Date.now()-shownAt;
+    if(i===inkIdx){score+=Math.max(6,26-rt/100);}
+    else{score=Math.max(0,score-8);msg.textContent=LANG==="en"?"That was the word, not the ink — reset.":"글자였어요, 잉크가 아니라 — 리셋.";if(navigator.vibrate)navigator.vibrate(60);}
+    gt(next,i===inkIdx?120:450);
+  }));
+  next();
+}
+
+/* 3 · REACTION & RESET — tap targets; a 'bad shot' flash requires you to pause (reset) */
+function game_reset(){
+  gameShell("Reaction & Reset","반응·리셋","Tap the green target fast. If it flashes RED, don't tap — breathe and wait for green.","초록 타깃을 빠르게. 빨강이면 누르지 말고 기다리세요.",
+    `<div class="gamearea" id="rArea"></div><div class="gmsg" id="rMsg"></div>`);
+  const area=document.getElementById("rArea"),msg=document.getElementById("rMsg");
+  let round=0,score=0,total=10,waitBad=false;
+  function place(){
+    if(round>=total){finishGame("reset",score,"Good reactions — and good discipline on the bad ones.","좋은 반응 — 실수에도 절제.");return;}
+    round++;area.innerHTML="";const bad=Math.random()<0.3;waitBad=bad;
+    const dot=document.createElement("div");dot.className="rtDot";
+    dot.style.background=bad?"var(--bad)":"var(--green)";dot.textContent=bad?"✕":"●";
+    const x=10+Math.random()*70,y=10+Math.random()*70;dot.style.left=x+"%";dot.style.top=y+"%";
+    area.appendChild(dot);
+    msg.textContent=(LANG==="en"?"Round ":"라운드 ")+round+" / "+total;
+    const shownAt=Date.now();
+    dot.addEventListener("click",()=>{
+      if(waitBad){score=Math.max(0,score-15);msg.textContent=LANG==="en"?"Bad shot — reset!":"실수 — 리셋!";}
+      else{const rt=Date.now()-shownAt;score+=Math.max(5,40-Math.round(rt/25));}
+      gt(place,300);
+    });
+    if(bad){gt(()=>{if(round<=total&&waitBad){score+=20;gt(place,200);}},1400);} // rewarded for NOT tapping
+  }
+  place();
+}
+
+/* 4 · CONCENTRATION GRID — classic PST drill: find 1→25 in order, 60s */
+function game_grid(){
+  gameShell("Concentration Grid","집중 그리드","Find the numbers 1 → 25 in order. 60 seconds. Scan calmly — rushing makes you blind.","1 → 25를 순서대로 찾으세요. 60초. 침착하게 스캔 — 서두르면 안 보입니다.",
+    `<div class="cgrid" id="cGrid"></div><div class="gmsg" id="cMsg"></div>`);
+  const grid=document.getElementById("cGrid"),msg=document.getElementById("cMsg");
+  const nums=[...Array(25).keys()].map(n=>n+1).sort(()=>Math.random()-.5);
+  const cells={};
+  nums.forEach(n=>{const c=document.createElement("div");c.className="cgcell";c.textContent=n;c.dataset.n=n;grid.appendChild(c);cells[n]=c;});
+  let next=1,timeLeft=60,done=false;
+  function status(){msg.textContent=(LANG==="en"?"Find ":"찾기: ")+next+"  ·  "+timeLeft+"s";}
+  function finish(){if(done)return;done=true;
+    const found=next-1;const bonus=next>25?timeLeft*2:0;
+    finishGame("grid",found*10+bonus,
+      next>25?"Full grid — elite scanning focus.":"Good scan. The grid rewards calm, systematic eyes — like reading wind flags.",
+      next>25?"그리드 완주 — 최상급 스캔 집중력.":"좋은 스캔. 그리드는 침착하고 체계적인 눈을 보상합니다 — 풍향기 읽듯이.");}
+  gi(()=>{if(done)return;timeLeft--;status();if(timeLeft<=0)finish();},1000);
+  grid.addEventListener("click",e=>{
+    const c=e.target.closest(".cgcell");if(!c||done)return;
+    if(+c.dataset.n===next){c.classList.add("done");next++;status();
+      if(navigator.vibrate)navigator.vibrate(10);
+      if(next>25)finish();}
+    else{c.classList.add("err");gt(()=>c.classList.remove("err"),250);}
+  });
+  status();
+}
+
+/* 5 · SEQUENCE MEMORY — Simon-style; score = longest sequence */
+function game_seq(){
+  gameShell("Sequence Memory","순서 기억","Watch the pattern, then repeat it. It grows each round.","패턴을 보고 반복하세요. 매 라운드 길어집니다.",
+    `<div class="seqgrid" id="sGrid"></div><div class="gmsg" id="sMsg">${t("gWatch")}</div>`);
+  const grid=document.getElementById("sGrid"),msg=document.getElementById("sMsg");
+  const cells=[];for(let i=0;i<9;i++){const c=document.createElement("div");c.className="seqcell";c.dataset.i=i;grid.appendChild(c);cells.push(c);}
+  let seq=[],input=[],accepting=false,level=0;
+  function flash(i,ms=380){return new Promise(r=>{cells[i].classList.add("lit");gt(()=>{cells[i].classList.remove("lit");gt(r,120);},ms);});}
+  async function play(){accepting=false;msg.textContent=t("gWatch");for(const i of seq){await flash(i);}accepting=true;input=[];msg.textContent=t("gYourTurn");}
+  function next(){level++;seq.push(Math.floor(Math.random()*9));gt(play,500);}
+  cells.forEach(c=>c.addEventListener("click",()=>{if(!accepting)return;const i=+c.dataset.i;c.classList.add("lit");gt(()=>c.classList.remove("lit"),150);
+    input.push(i);const idx=input.length-1;
+    if(input[idx]!==seq[idx]){finishGame("seq",(level-1)*20,"Composure counts. Try again and breathe between taps.","침착함이 중요. 다시, 탭 사이 호흡.");return;}
+    if(input.length===seq.length){accepting=false;msg.textContent="✓";gt(next,600);}
+  }));
+  next();
+}
+
+/* ============================================================
+   TOOLBOX — My Game Plan card + quick techniques
+============================================================ */
+async function renderToolbox(){
+  const u=await DB.getUser(SESSION.id)||{};
+  const gp=u.gameplan||{routine:"",cue:"",reset:"",why:""};
+  const card=document.getElementById("gameplanCard");
+  card.innerHTML=`
+    <p class="eyebrow" style="color:var(--brass)">${t("gpEyebrow")}</p>
+    <h2>${t("gpTitle")}</h2>
+    <p class="lead">${t("gpLead")}</p>
+    <div class="field"><label class="q">${t("gpRoutine")} <span class="help">${t("gpRoutineH")}</span></label>
+      <textarea id="gpRoutine" rows="2" placeholder="${t("gpRoutinePh")}">${gp.routine||""}</textarea></div>
+    <div class="field"><label class="q">${t("gpCue")} <span class="help">${t("gpCueH")}</span></label>
+      <input type="text" id="gpCue" placeholder="${t("gpCuePh")}" value="${(gp.cue||"").replace(/"/g,"&quot;")}"></div>
+    <div class="field"><label class="q">${t("gpReset")} <span class="help">${t("gpResetH")}</span></label>
+      <textarea id="gpReset" rows="2" placeholder="${t("gpResetPh")}">${gp.reset||""}</textarea></div>
+    <div class="field"><label class="q">${t("gpWhy")}</label>
+      <textarea id="gpWhy" rows="2" placeholder="${t("gpWhyPh")}">${gp.why||""}</textarea></div>
+    <div class="btnrow"><button class="btn" id="gpSave">${t("gpSave")}</button></div>`;
+  document.getElementById("gpSave").addEventListener("click",async()=>{
+    const gameplan={routine:document.getElementById("gpRoutine").value.trim(),
+      cue:document.getElementById("gpCue").value.trim(),
+      reset:document.getElementById("gpReset").value.trim(),
+      why:document.getElementById("gpWhy").value.trim(),updatedAt:new Date().toISOString()};
+    await DB.setUser(SESSION.id,{gameplan});
+    if(navigator.vibrate)navigator.vibrate(30);
+    toast(t("gpSaved"));
+  });
+
+  const tech=document.getElementById("techCard");
+  const techs=[
+    ["🫁",t("tq1T"),t("tq1B")],
+    ["🧊",t("tq2T"),t("tq2B")],
+    ["🗣",t("tq3T"),t("tq3B")],
+    ["🔄",t("tq4T"),t("tq4B")],
+  ];
+  tech.innerHTML=`<p class="eyebrow">${t("tqEyebrow")}</p><h2>${t("tqTitle")}</h2>
+    ${techs.map(x=>`<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line)">
+      <span style="font-size:22px;line-height:1.2">${x[0]}</span>
+      <div><div style="font-weight:700;font-size:14px">${x[1]}</div>
+      <div style="font-size:12.5px;color:var(--ink2);line-height:1.45;margin-top:2px">${x[2]}</div></div></div>`).join("")}`;
+}
+
+/* recommended game based on today's profile — nudges the athlete to the right drill */
+function recGameHtml(prof){
+  const map={profStress:"breath",profFlat:"breath",profMixed:"breath",profOk:"grid",profStrong:"stroop"};
+  const g=GAMES.find(x=>x.id===(map[prof]||"breath"));if(!g)return "";
+  return `<div style="display:flex;gap:12px;align-items:center;margin-top:14px;padding:12px 14px;border:1px solid var(--line2);border-radius:12px;background:linear-gradient(180deg,var(--bg3),var(--bg2))">
+    <span style="font-size:26px">${g.icon}</span>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:11px;color:var(--brass);text-transform:uppercase;letter-spacing:.08em;font-weight:700">${t("recGameT")}</div>
+      <div style="font-size:13.5px;color:var(--ink)">${LANG==="en"?g.nEn:g.nKo} · <span style="color:var(--ink3)">${LANG==="en"?g.dEn:g.dKo}</span></div>
+    </div>
+    <button class="btn sm" id="recGameBtn" data-g="${g.id}">${t("recGameBtn")}</button></div>`;
+}
+
+/* ============================================================
+   CONTACT — WhatsApp + booking/message note
+============================================================ */
+function renderContact(){
+  const card=document.getElementById("contactCard");
+  const waBase="https://wa.me/"+PSYCH.whatsapp;
+  card.innerHTML=`
+    <p class="eyebrow" style="color:var(--glass)">${t("ctEyebrow")}</p>
+    <h2 data-t="ctTitle">${t("ctTitle")}</h2>
+    <p class="lead">${t("ctLead")}</p>
+    <div class="contactrow">
+      <div class="ci wa">💬</div>
+      <div style="flex:1"><div style="font-weight:700">${PSYCH.name}</div>
+        <div style="font-size:12px;color:var(--ink3)">${PSYCH.role}</div></div>
+    </div>
+    <div class="field"><label class="q">${t("ctReason")}</label>
+      <select id="ctReasonSel">
+        <option value="session">${t("ctR1")}</option>
+        <option value="talk">${t("ctR2")}</option>
+        <option value="tool">${t("ctR3")}</option>
+        <option value="other">${t("ctR4")}</option>
+      </select></div>
+    <div class="field"><label class="q">${t("ctMsg")}</label>
+      <textarea id="ctMsgBox" rows="3" placeholder="${t("ctMsgPh")}"></textarea></div>
+    <div class="btnrow">
+      <button class="btn wa" id="ctSend">💬 ${t("ctSendWa")}</button>
+    </div>
+    <p style="font-size:11px;color:var(--ink3);margin-top:10px">${t("ctNote")}</p>`;
+  document.getElementById("ctSend").addEventListener("click",()=>{
+    const reasonSel=document.getElementById("ctReasonSel");
+    const reason=reasonSel.options[reasonSel.selectedIndex].text;
+    const msg=document.getElementById("ctMsgBox").value.trim();
+    const text=`${t("ctHello")} ${PSYCH.name.split(" ")[0]}, ${t("ctThis")} ${SESSION.name} (${SESSION.id}).\n${t("ctReason")}: ${reason}`+(msg?`\n${msg}`:"");
+    const url=waBase+"?text="+encodeURIComponent(text);
+    window.open(url,"_blank");
+  });
+}
+
+/* ---------- auth ---------- */
+async function doLogin(){const id=document.getElementById("loginUser").value.trim(),pass=document.getElementById("loginPass").value.trim();
+  const err=document.getElementById("loginErr");err.textContent="";const u=await DB.getUser(id);
+  if(!u||u.pass!==pass){err.textContent=t("loginFail");return;}
+  SESSION={id,name:u.name,role:u.role,discipline:u.discipline||""};
+  document.getElementById("loginView").classList.add("hidden");document.getElementById("appView").classList.remove("hidden");
+  document.getElementById("logoutBtn").classList.remove("hidden");
+  currentTab=(TAB_DEFS[SESSION.role][0]||["before"])[0];buildTabs();renderWhoAmI();showTab(currentTab);}
+function doLogout(){SESSION=null;currentTab=null;
+  document.getElementById("appView").classList.add("hidden");document.getElementById("loginView").classList.remove("hidden");
+  document.getElementById("logoutBtn").classList.add("hidden");document.getElementById("whoami").classList.add("hidden");
+  document.getElementById("loginUser").value="";document.getElementById("loginPass").value="";}
+
+/* ---------- wire ---------- */
+document.getElementById("themeToggle").addEventListener("click",()=>{
+  const m=getTheme()==="dark"?"light":"dark";
+  try{localStorage.setItem(THEME_KEY,m);}catch(e){}
+  applyTheme(m);if(navigator.vibrate)navigator.vibrate(15);
+  if(SESSION)showTab(currentTab);});
+document.getElementById("langs").addEventListener("click",e=>{const b=e.target.closest("button[data-lang]");if(!b)return;
+  LANG=b.dataset.lang;document.querySelectorAll("#langs button").forEach(x=>x.classList.toggle("on",x===b));applyLang();});
+document.getElementById("loginBtn").addEventListener("click",doLogin);
+document.getElementById("loginPass").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
+document.getElementById("logoutBtn").addEventListener("click",doLogout);
+["dArousal","dFocus"].forEach(id=>{const el=document.getElementById(id);el.addEventListener("input",()=>document.getElementById(id+"V").textContent=el.value);});
+document.getElementById("submitBrums").addEventListener("click",async()=>{const {scores,complete}=readBrums();if(!complete){toast(t("saveFirst"));return;}
+  await DB.setDay(SESSION.id,todayKey(),{brums:scores,brumsAt:new Date().toISOString()});
+  renderResult(scores,await DB.getDay(SESSION.id,yesterdayKey()));if(navigator.vibrate)navigator.vibrate(25);toast(t("brumsSaved"));
+  document.getElementById("alreadyBrums").classList.remove("hidden");renderStreak();});
+document.getElementById("clearBrums").addEventListener("click",()=>{document.querySelectorAll('#brumsList input:checked').forEach(i=>i.checked=false);
+  document.getElementById("brumsResult").classList.add("hidden");toast(t("cleared"));});
+document.getElementById("saveDiary").addEventListener("click",async()=>{
+  const diary={sessType:(document.querySelector('input[name="sessType"]:checked')||{}).value||"live",
+    shots:parseInt(document.getElementById("dShots").value||"0",10),arousal:parseInt(document.getElementById("dArousal").value,10),
+    focus:parseInt(document.getElementById("dFocus").value,10),routine:(document.querySelector('input[name="routine"]:checked')||{}).value||"every",
+    reset:(document.querySelector('input[name="reset"]:checked')||{}).value||"fast",best:document.getElementById("dBest").value.trim(),
+    broke:document.getElementById("dBroke").value.trim(),fix:document.getElementById("dFix").value.trim(),at:new Date().toISOString()};
+  await DB.setDay(SESSION.id,todayKey(),{diary});if(navigator.vibrate)navigator.vibrate(25);toast(t("diarySaved"));renderDiaryFeedback(diary);});
+document.getElementById("clearDiary").addEventListener("click",()=>{document.getElementById("dShots").value="";
+  document.getElementById("dArousal").value=5;document.getElementById("dArousalV").textContent="5";
+  document.getElementById("dFocus").value=5;document.getElementById("dFocusV").textContent="5";
+  document.getElementById("dBest").value="";document.getElementById("dBroke").value="";document.getElementById("dFix").value="";document.getElementById("diaryFeedback").classList.add("hidden");toast(t("cleared"));});
+document.getElementById("exportAll").addEventListener("click",exportSquadCsv);
+document.getElementById("loadDemoData").addEventListener("click",loadDemoData);
+document.getElementById("loadDemoSelf").addEventListener("click",loadDemoSelf);
+document.getElementById("sortRoster").addEventListener("change",renderRoster);
+document.getElementById("newAccountBtn").addEventListener("click",openNewAccount);
+
+async function init(){if(CONFIGURED)document.getElementById("configBanner").classList.add("hidden");await ensureSeed();applyLang();}
+init();
+</script>
+</body>
+</html>
