@@ -589,6 +589,7 @@ const DB={
   async deleteUser(id){ if(OFFLINE){delete mem.users[id];return;} await db.collection("users").doc(id).delete(); },
   async getDay(uid,date){ const k=uid+"_"+date; if(OFFLINE)return mem.days[k]||null; const d=await db.collection("days").doc(k).get(); return d.exists?d.data():null; },
   async setDay(uid,date,data){ const k=uid+"_"+date; if(OFFLINE){mem.days[k]={...(mem.days[k]||{}),...data,uid,date};return;} await db.collection("days").doc(k).set({...data,uid,date},{merge:true}); },
+  async deleteDay(uid,date){ const k=uid+"_"+date; if(OFFLINE){delete mem.days[k];return;} await db.collection("days").doc(k).delete(); },
   async listDaysFor(uid){ if(OFFLINE)return Object.values(mem.days).filter(d=>d.uid===uid).sort((a,b)=>a.date<b.date?-1:1); const s=await db.collection("days").where("uid","==",uid).get(); return s.docs.map(d=>d.data()).sort((a,b)=>a.date<b.date?-1:1); },
   async addNote(uid,note){ if(OFFLINE){(mem.notes[uid]=mem.notes[uid]||[]).push(note);return;} await db.collection("notes").add({uid,...note}); },
   async listNotes(uid){ if(OFFLINE)return (mem.notes[uid]||[]).slice().sort((a,b)=>b.at<a.at?-1:1); const s=await db.collection("notes").where("uid","==",uid).get(); return s.docs.map(d=>d.data()).sort((a,b)=>b.at<a.at?-1:1); }
@@ -661,7 +662,7 @@ const I18N={
     noNotesT:"No notes yet",noNotesB:"Notes you add here stay with this athlete's record.",privLbl:"Staff only",privToggle:"Visible to athlete",
     colId:"ID",colName:"Name",colRole:"Role",colDisc:"Discipline",colPass:"Passcode",colAct:"Actions",del:"Delete",editPass:"Passcode",
     fName:"Full name",fId:"User ID",fRole:"Role",fDisc:"Discipline",fPass:"Passcode (4 digits)",create:"Create account",cancel:"Cancel",save:"Save",
-    rAthlete:"Athlete",rCoach:"Coach",rAdmin:"Admin / Psych",created:"Account created.",updated:"Updated.",deleted:"Account deleted.",demoLoaded:"Demo data loaded.",exported:"CSV exported.",
+    rAthlete:"Athlete",rCoach:"Coach",rAdmin:"Admin / Psych",created:"Account created.",updated:"Updated.",deleted:"Account deleted.",delConfirm:"Delete {name} and all their data? This cannot be undone.",delFail:"Could not delete. If you use Firestore rules that block deletes, change them to allow write, then try again.",demoLoaded:"Demo data loaded.",exported:"CSV exported.",
     back:"‹ Squad",readiness:"Latest readiness",noEntry:"No reading",discRifle:"Rifle",discPistol:"Pistol",discShotgun:"Shotgun",
     streakTitle:"day streak",streakSub:"Mood checks logged in a row. Daily logging is what makes the plan accurate.",
     lastLogged:"last logged",today:"today",dayAgo:"1 day ago",daysAgo:"days ago",never:"never",rosterEmptyT:"No athletes yet",rosterEmptyB:"Add athletes in the Accounts tab, or load demo data to explore.",
@@ -731,7 +732,7 @@ const I18N={
     noNotesT:"메모 없음",noNotesB:"여기 추가한 메모는 이 선수 기록에 보관됩니다.",privLbl:"스태프 전용",privToggle:"선수에게 표시",
     colId:"ID",colName:"이름",colRole:"역할",colDisc:"종목",colPass:"비밀번호",colAct:"작업",del:"삭제",editPass:"비밀번호",
     fName:"전체 이름",fId:"사용자 ID",fRole:"역할",fDisc:"종목",fPass:"비밀번호(4자리)",create:"계정 생성",cancel:"취소",save:"저장",
-    rAthlete:"선수",rCoach:"코치",rAdmin:"관리자/심리",created:"계정 생성됨.",updated:"수정됨.",deleted:"계정 삭제됨.",demoLoaded:"데모 데이터 불러옴.",exported:"CSV 내보냄.",
+    rAthlete:"선수",rCoach:"코치",rAdmin:"관리자/심리",created:"계정 생성됨.",updated:"수정됨.",deleted:"계정 삭제됨.",delConfirm:"{name} 및 모든 데이터를 삭제할까요? 되돌릴 수 없습니다.",delFail:"삭제 실패. 삭제를 막는 Firestore 규칙을 사용 중이면 write 허용으로 변경 후 다시 시도하세요.",demoLoaded:"데모 데이터 불러옴.",exported:"CSV 내보냄.",
     back:"‹ 스쿼드",readiness:"최근 준비도",noEntry:"기록 없음",discRifle:"라이플",discPistol:"피스톨",discShotgun:"샷건",
     streakTitle:"일 연속",streakSub:"연속으로 기록한 기분 점검. 매일 기록해야 계획이 정확해집니다.",
     lastLogged:"마지막 기록",today:"오늘",dayAgo:"1일 전",daysAgo:"일 전",never:"없음",rosterEmptyT:"선수 없음",rosterEmptyB:"계정 탭에서 선수를 추가하거나 데모 데이터를 불러오세요.",
@@ -1311,7 +1312,24 @@ async function renderAccounts(){
       <td><input type="text" value="${u.pass}" data-pass="${u.id}" style="width:90px;padding:5px;text-align:center;font-family:JetBrains Mono"></td>
       <td>${canDel?`<button class="btn danger sm" data-del="${u.id}">${t("del")}</button>`:"—"}</td></tr>`;});
   tbl.innerHTML=rows+"</tbody>";
-  tbl.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",async()=>{await DB.deleteUser(b.dataset.del);toast(t("deleted"));renderAccounts();}));
+  tbl.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",async()=>{
+    const id=b.dataset.del;
+    const u=(await DB.listUsers()).find(x=>x.id===id);
+    const nm=u?u.name:id;
+    if(!confirm(t("delConfirm").replace("{name}",nm+" ("+id+")")))return;
+    b.disabled=true;b.textContent="…";
+    try{
+      await DB.deleteUser(id);
+      // also remove their day records so nothing is left orphaned
+      try{const days=await DB.listDaysFor(id);for(const d of days){await DB.deleteDay(id,d.date);}}catch(e){}
+      toast(t("deleted"));
+      renderAccounts();
+    }catch(err){
+      console.error("delete failed",err);
+      b.disabled=false;b.textContent=t("del");
+      alert(t("delFail"));
+    }
+  }));
   tbl.querySelectorAll("[data-pass]").forEach(inp=>inp.addEventListener("change",async()=>{
     if(inp.value.length<4){renderAccounts();return;}
     await DB.setUser(inp.dataset.pass,{pass:inp.value});toast(t("updated"));}));
