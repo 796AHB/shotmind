@@ -286,6 +286,10 @@
   .contactrow .ci{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;flex:0 0 auto}
   .wa{background:#25D36622;border:1px solid #25D36688}
   .btn.wa{background:#25D366;color:#fff}.btn.wa:hover{background:#20c05d}
+  /* auth tabs (SilatMind-style) */
+  .authtabs{display:flex;gap:6px;background:var(--bg3);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:18px}
+  .authtab{flex:1;border:0;background:transparent;padding:9px 6px;border-radius:9px;font:inherit;font-weight:600;font-size:14px;color:var(--ink2);cursor:pointer;transition:.15s}
+  .authtab.on{background:var(--glass);color:var(--onglass);box-shadow:0 2px 8px rgba(15,163,150,.25)}
   @media(max-width:560px){
     .brums-item{grid-template-columns:1fr}.scale{justify-content:space-between}.scale span{width:44px;height:44px;font-size:16px}
     .readout{justify-content:center}.subscores{grid-template-columns:repeat(3,1fr)}
@@ -350,17 +354,45 @@
   <!-- LOGIN -->
   <div id="loginView" class="login-wrap">
     <div class="card">
-      <p class="eyebrow" data-t="signIn">Sign in</p>
-      <h2 data-t="loginTitle">Enter your access</h2>
-      <p class="lead" data-t="loginLead">Use the User ID and passcode your sport psychologist issued you.</p>
-      <div class="field"><label class="q" data-t="userId">User ID</label>
-        <input type="text" id="loginUser" autocomplete="username" placeholder="RIF01"></div>
-      <div class="field"><label class="q" data-t="passcode">Passcode</label>
-        <input type="password" id="loginPass" class="pininput" inputmode="numeric" autocomplete="current-password" placeholder="••••"></div>
-      <div class="err" id="loginErr"></div>
-      <div class="btnrow"><button class="btn" id="loginBtn" data-t="loginBtn" style="width:100%;justify-content:center">Sign in</button></div>
-      <div class="banner warn" style="margin:16px 0 0">
-        <span>○</span><div><span data-t="demoHint">Demo: </span><span class="mono">Athlete RIF01·2222 · Coach coach1·1111</span></div></div>
+      <div class="authtabs" id="authTabs">
+        <button class="authtab on" data-mode="login" data-t="signIn">Sign in</button>
+        <button class="authtab" data-mode="signup" data-t="signUp">Sign up</button>
+      </div>
+
+      <!-- SIGN IN -->
+      <div id="loginPane">
+        <h2 data-t="loginTitle">Enter your access</h2>
+        <p class="lead" data-t="loginLead">Use the username and password your sport psychologist issued you — or the account you created.</p>
+        <div class="field"><label class="q" data-t="userName">Username</label>
+          <input type="text" id="loginUser" autocomplete="username" placeholder="e.g. aiman01"></div>
+        <div class="field"><label class="q" data-t="password">Password</label>
+          <input type="password" id="loginPass" autocomplete="current-password" placeholder="••••••"></div>
+        <div class="err" id="loginErr"></div>
+        <div class="btnrow"><button class="btn" id="loginBtn" data-t="loginBtn" style="width:100%;justify-content:center">Sign in</button></div>
+      </div>
+
+      <!-- SIGN UP -->
+      <div id="signupPane" class="hidden">
+        <h2 data-t="signupTitle">Create your athlete account</h2>
+        <p class="lead" data-t="signupLead">New athlete? Register here, then tell your sport psychologist your username so they can link you to the squad.</p>
+        <div class="field"><label class="q" data-t="fullName">Full name</label>
+          <input type="text" id="suName" autocomplete="name" placeholder="Ahmad Aiman"></div>
+        <div class="field"><label class="q" data-t="userName">Username</label>
+          <input type="text" id="suUser" autocomplete="username" placeholder="aiman01"></div>
+        <div class="field"><label class="q" data-t="suDiscipline">Discipline</label>
+          <select id="suDisc">
+            <option value="rifle" data-t="dRifle">Rifle</option>
+            <option value="pistol" data-t="dPistol">Pistol</option>
+            <option value="shotgun" data-t="dShotgun">Shotgun</option>
+            <option value="other" data-t="dOther">Other</option>
+          </select></div>
+        <div class="field"><label class="q" data-t="password">Password</label>
+          <input type="password" id="suPass" autocomplete="new-password" placeholder="At least 4 characters"></div>
+        <div class="field"><label class="q" data-t="suConfirm">Confirm password</label>
+          <input type="password" id="suPass2" autocomplete="new-password" placeholder="••••••"></div>
+        <div class="err" id="suErr"></div>
+        <div class="btnrow"><button class="btn" id="suBtn" data-t="suBtn" style="width:100%;justify-content:center">Create account</button></div>
+      </div>
     </div>
   </div>
 
@@ -441,7 +473,6 @@
         <p class="eyebrow" data-t="ebTrend">Day by day</p>
         <h2 data-t="trendTitle">Your readiness over time</h2>
         <p class="lead" data-t="trendLead">Each day's mood check is read against the previous session's review. Tap any day to see everything you logged.</p>
-        <div class="btnrow" style="margin-bottom:14px"><button class="btn ghost sm" id="loadDemoSelf" data-t="loadDemoSelf">Load sample data</button></div>
         <div id="trendSpark"></div>
         <div id="trendBody"></div>
       </div>
@@ -477,7 +508,6 @@
         <p class="lead" data-t="rosterLead">Each card shows today's readiness and how long since the athlete last logged. Open one for trend and notes.</p>
         <div class="rostertools">
           <button class="btn ghost sm" id="exportAll" data-t="exportAll">Export squad CSV</button>
-          <button class="btn ghost sm" id="loadDemoData" data-t="loadDemo">Load demo data</button>
           <select id="sortRoster">
             <option value="risk" data-t="sortRisk">Sort: needs attention</option>
             <option value="name" data-t="sortName">Sort: name</option>
@@ -521,11 +551,7 @@ const FIREBASE_CONFIG = {
   appId: "1:179902352786:web:adf38571cecc765263054b",
   measurementId: "G-PHV9DK1JNM"
 };
-/* DEMO BUILD: forced offline so this showcase never writes to the live
-   database. Everything runs on in-browser demo data. To make this a live
-   copy again, delete the next line. */
-const DEMO_MODE = true;
-const CONFIGURED = !DEMO_MODE && !FIREBASE_CONFIG.apiKey.startsWith("PASTE_");
+const CONFIGURED = !FIREBASE_CONFIG.apiKey.startsWith("PASTE_");
 
 /* ╔═══════════════════════════════════════════════════╗
    ║  YOUR CONTACT DETAILS — edit these                 ║
@@ -574,6 +600,13 @@ const I18N={
     cfgTitle:"Firebase not connected.",cfgBody:" Paste your project config into the FIREBASE_CONFIG block at the top of the script and reload. Until then ShotMind runs on demo data stored only in this browser.",
     signIn:"Sign in",loginTitle:"Enter your access",loginLead:"Use the User ID and passcode your sport psychologist issued you.",
     userId:"User ID",passcode:"Passcode",loginBtn:"Sign in",demoHint:"Demo: ",
+    signUp:"Sign up",userName:"Username",password:"Password",signupTitle:"Create your athlete account",
+    signupLead:"New athlete? Register here, then tell your sport psychologist your username so they can link you to the squad.",
+    fullName:"Full name",suDiscipline:"Discipline",dRifle:"Rifle",dPistol:"Pistol",dShotgun:"Shotgun",dOther:"Other",
+    suConfirm:"Confirm password",suBtn:"Create account",
+    suNeedName:"Please enter your name.",suBadUser:"Username: 3–20 letters, numbers or _ only.",
+    suShortPass:"Password must be at least 4 characters.",suMismatch:"Passwords don't match.",
+    suSaveFail:"Couldn't save — check your connection and try again.",
     ebBefore:"Before training · Mood check",brumsTitle:"Quick mood check",brumsLead:"Six quick ratings of how you feel right now. Takes 30 seconds — this sets today's plan.",
     brumsDone:"Logged today already. Submitting again overwrites it.",anchor0:"0 — not at all",anchor4:"4 — extremely",
     rightNow:"Right now I feel…",
@@ -637,6 +670,13 @@ const I18N={
     cfgTitle:"Firebase 미연결.",cfgBody:" 스크립트 상단 FIREBASE_CONFIG 블록에 프로젝트 구성을 붙여넣고 새로고침하세요. 그 전까지는 이 브라우저에만 저장되는 데모 데이터로 실행됩니다.",
     signIn:"로그인",loginTitle:"접근 정보 입력",loginLead:"스포츠 심리관이 발급한 사용자 ID와 비밀번호를 사용하세요.",
     userId:"사용자 ID",passcode:"비밀번호",loginBtn:"로그인",demoHint:"데모: ",
+    signUp:"회원가입",userName:"사용자 이름",password:"비밀번호",signupTitle:"선수 계정 만들기",
+    signupLead:"신규 선수신가요? 여기서 등록한 뒤, 사용자 이름을 스포츠 심리관에게 알려 스쿼드에 연결하세요.",
+    fullName:"이름",suDiscipline:"종목",dRifle:"라이플",dPistol:"권총",dShotgun:"샷건",dOther:"기타",
+    suConfirm:"비밀번호 확인",suBtn:"계정 만들기",
+    suNeedName:"이름을 입력하세요.",suBadUser:"사용자 이름: 3–20자, 영문·숫자·_ 만.",
+    suShortPass:"비밀번호는 최소 4자 이상.",suMismatch:"비밀번호가 일치하지 않습니다.",
+    suSaveFail:"저장 실패 — 연결을 확인하고 다시 시도하세요.",
     ebBefore:"훈련 전 · 기분 점검",brumsTitle:"빠른 기분 점검",brumsLead:"지금 느끼는 기분을 6개 항목으로 빠르게 평가하세요. 30초면 됩니다 — 오늘의 계획을 만듭니다.",
     brumsDone:"오늘 이미 기록함. 다시 제출하면 덮어씁니다.",anchor0:"0 — 전혀 아님",anchor4:"4 — 매우 그렇다",
     rightNow:"지금 나는…",
@@ -758,34 +798,10 @@ const daysBetween=(a,b)=>Math.round((new Date(b+"T00:00:00")-new Date(a+"T00:00:
 function toast(m){const e=document.getElementById("toast");e.textContent=m;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),2400);}
 
 async function ensureSeed(){
-  if(await DB.getUser("admin"))return;
-  await DB.setUser("admin",{name:"Ahmad Hishamudin",role:"admin",pass:"0000",discipline:""});
+  try{ if(await DB.getUser("admin"))return; }catch(e){ return; /* offline: LOCAL_ACCOUNTS covers admin+coach */ }
+  // admin + coach only. Athletes register themselves, or admin adds them.
+  await DB.setUser("admin",{name:"Ahmad Hishamudin bin Beraim",role:"admin",pass:"0000",discipline:""});
   await DB.setUser("coach1",{name:"Head Coach",role:"coach",pass:"1111",discipline:""});
-  await DB.setUser("RIF01",{name:"Aiman",role:"athlete",pass:"2222",discipline:"rifle",
-    gameplan:{routine:"Feet set \u2192 grip \u2192 breathe out \u2192 sight picture \u2192 hold \u2192 squeeze",
-      cue:"Smooth",reset:"Lower rifle, one long breath, say my cue, next shot is new",
-      why:"For my family, and to prove I belong at this level.",updatedAt:new Date().toISOString()}});
-  await DB.setUser("PIS01",{name:"Nadia",role:"athlete",pass:"3333",discipline:"pistol"});
-  await DB.setUser("SHO01",{name:"Hafiz",role:"athlete",pass:"4444",discipline:"shotgun"});
-  await seedDemoAthlete();
-}
-/* Populate the showcase athlete (Aiman/RIF01) with a full 10-day history +
-   game scores, so a demo opens ready to show athlete & coach views. */
-async function seedDemoAthlete(){
-  const arc=demoArc();
-  // game scores keyed by the arc's "off" (days ago) — realistic practice pattern
-  const gsByOff={10:{breath:100,grid:210},9:{stroop:280},8:{breath:75,reset:190},
-    7:{},6:{breath:100},5:{grid:170,breath:75},4:{stroop:342,grid:250},
-    3:{reset:220},2:{breath:125,stroop:300},1:{grid:370,breath:100,seq:80}};
-  for(const r of arc){
-    const dt=new Date();dt.setDate(dt.getDate()-r.off);const key=dt.toISOString().slice(0,10);
-    const payload={brums:r.b,brumsAt:dt.toISOString(),diary:{...r.d,at:dt.toISOString()}};
-    const gs=gsByOff[r.off];
-    if(gs&&Object.keys(gs).length)payload.games=gs;
-    await DB.setDay("RIF01",key,payload);
-  }
-  await DB.addNote("RIF01",{text:"Strong recovery after the mid-block fatigue dip. Watch reset speed under sim-final pressure.",
-    by:"Head Coach",at:new Date().toISOString(),private:false});
 }
 
 /* ---------- lang/tabs ---------- */
@@ -1292,31 +1308,31 @@ async function renderAccounts(){
   let rows=`<thead><tr><th>${t("colId")}</th><th>${t("colName")}</th><th>${t("colRole")}</th><th>${t("colDisc")}</th><th>${t("colPass")}</th><th>${t("colAct")}</th></tr></thead><tbody>`;
   users.sort((a,b)=>a.role<b.role?-1:1).forEach(u=>{const canDel=u.id!=="admin";
     rows+=`<tr><td class="day">${u.id}</td><td style="font-family:Inter">${u.name}</td><td>${rl[u.role]||u.role}</td><td>${dl[u.discipline||""]||"—"}</td>
-      <td><input type="text" value="${u.pass}" maxlength="4" data-pass="${u.id}" style="width:64px;padding:5px;text-align:center;font-family:JetBrains Mono"></td>
+      <td><input type="text" value="${u.pass}" data-pass="${u.id}" style="width:90px;padding:5px;text-align:center;font-family:JetBrains Mono"></td>
       <td>${canDel?`<button class="btn danger sm" data-del="${u.id}">${t("del")}</button>`:"—"}</td></tr>`;});
   tbl.innerHTML=rows+"</tbody>";
   tbl.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",async()=>{await DB.deleteUser(b.dataset.del);toast(t("deleted"));renderAccounts();}));
   tbl.querySelectorAll("[data-pass]").forEach(inp=>inp.addEventListener("change",async()=>{
-    if(!/^\d{4}$/.test(inp.value)){renderAccounts();return;}
+    if(inp.value.length<4){renderAccounts();return;}
     await DB.setUser(inp.dataset.pass,{pass:inp.value});toast(t("updated"));}));
 }
 function openNewAccount(){const root=document.getElementById("modalRoot");
   root.innerHTML=`<div class="modal"><div class="box"><h2 style="margin:0 0 16px;font-family:Oswald">${t("newAccount")}</h2>
     <div class="field"><label class="q">${t("fName")}</label><input type="text" id="aName"></div>
-    <div class="field"><label class="q">${t("fId")}</label><input type="text" id="aId" placeholder="RIF02"></div>
+    <div class="field"><label class="q">${t("fId")}</label><input type="text" id="aId" placeholder="aiman01"></div>
     <div class="field"><label class="q">${t("fRole")}</label><select id="aRole"><option value="athlete">${t("rAthlete")}</option><option value="coach">${t("rCoach")}</option><option value="admin">${t("rAdmin")}</option></select></div>
     <div class="field" id="discWrap"><label class="q">${t("fDisc")}</label><select id="aDisc"><option value="rifle">${t("discRifle")}</option><option value="pistol">${t("discPistol")}</option><option value="shotgun">${t("discShotgun")}</option></select></div>
-    <div class="field"><label class="q">${t("fPass")}</label><input type="text" id="aPass" class="pininput" maxlength="4" inputmode="numeric" placeholder="0000"></div>
+    <div class="field"><label class="q">${t("fPass")}</label><input type="text" id="aPass" placeholder="min 4 characters"></div>
     <div class="err" id="aErr"></div>
     <div class="btnrow"><button class="btn" id="aCreate">${t("create")}</button><button class="btn ghost" id="aCancel">${t("cancel")}</button></div></div></div>`;
   const roleSel=document.getElementById("aRole"),discWrap=document.getElementById("discWrap");
   roleSel.addEventListener("change",()=>discWrap.style.display=roleSel.value==="athlete"?"block":"none");
   document.getElementById("aCancel").addEventListener("click",()=>root.innerHTML="");
   document.getElementById("aCreate").addEventListener("click",async()=>{
-    const name=document.getElementById("aName").value.trim(),id=document.getElementById("aId").value.trim();
+    const name=document.getElementById("aName").value.trim(),id=document.getElementById("aId").value.trim().toLowerCase();
     const role=roleSel.value,disc=role==="athlete"?document.getElementById("aDisc").value:"";
-    const pass=document.getElementById("aPass").value.trim(),err=document.getElementById("aErr");
-    if(!name||!id||!/^\d{4}$/.test(pass)){err.textContent=t("saveFirst");return;}
+    const pass=document.getElementById("aPass").value,err=document.getElementById("aErr");
+    if(!name||!id||pass.length<4){err.textContent=t("saveFirst");return;}
     if(await DB.getUser(id)){err.textContent=t("idTaken");return;}
     await DB.setUser(id,{name,role,pass,discipline:disc});root.innerHTML="";toast(t("created"));renderAccounts();});
 }
@@ -1658,17 +1674,65 @@ function renderContact(){
 }
 
 /* ---------- auth ---------- */
-async function doLogin(){const id=document.getElementById("loginUser").value.trim(),pass=document.getElementById("loginPass").value.trim();
-  const err=document.getElementById("loginErr");err.textContent="";const u=await DB.getUser(id);
+/* ---------- auth: username + password, self sign-up, local fallback ---------- */
+// local fallback accounts (used if Firestore unreachable) — admin + coach only
+const LOCAL_ACCOUNTS={
+  admin:{name:"Ahmad Hishamudin bin Beraim",role:"admin",pass:"0000",discipline:""},
+  coach1:{name:"Head Coach",role:"coach",pass:"1111",discipline:""}
+};
+async function findUser(id){
+  // try DB first; on any failure fall back to local accounts
+  try{const u=await DB.getUser(id);if(u)return u;}catch(e){/* fall through */}
+  return LOCAL_ACCOUNTS[id]||null;
+}
+async function doLogin(){
+  const id=document.getElementById("loginUser").value.trim().toLowerCase();
+  const pass=document.getElementById("loginPass").value;
+  const err=document.getElementById("loginErr");err.textContent="";
+  if(!id||!pass){err.textContent=t("loginFail");return;}
+  const u=await findUser(id);
   if(!u||u.pass!==pass){err.textContent=t("loginFail");return;}
   SESSION={id,name:u.name,role:u.role,discipline:u.discipline||""};
-  document.getElementById("loginView").classList.add("hidden");document.getElementById("appView").classList.remove("hidden");
+  enterApp();
+}
+async function doSignup(){
+  const name=document.getElementById("suName").value.trim();
+  const id=document.getElementById("suUser").value.trim().toLowerCase();
+  const disc=document.getElementById("suDisc").value;
+  const p1=document.getElementById("suPass").value,p2=document.getElementById("suPass2").value;
+  const err=document.getElementById("suErr");err.textContent="";
+  if(!name){err.textContent=t("suNeedName");return;}
+  if(!/^[a-z0-9_]{3,20}$/.test(id)){err.textContent=t("suBadUser");return;}
+  if(p1.length<4){err.textContent=t("suShortPass");return;}
+  if(p1!==p2){err.textContent=t("suMismatch");return;}
+  // username must be free (check DB + local reserved names)
+  if(LOCAL_ACCOUNTS[id]){err.textContent=t("idTaken");return;}
+  let existing=null;try{existing=await DB.getUser(id);}catch(e){}
+  if(existing){err.textContent=t("idTaken");return;}
+  try{
+    await DB.setUser(id,{name,role:"athlete",pass:p1,discipline:disc,selfRegistered:true,createdAt:new Date().toISOString()});
+  }catch(e){err.textContent=t("suSaveFail");return;}
+  if(navigator.vibrate)navigator.vibrate(25);
+  SESSION={id,name,role:"athlete",discipline:disc};
+  enterApp();
+}
+function enterApp(){
+  document.getElementById("loginView").classList.add("hidden");
+  document.getElementById("appView").classList.remove("hidden");
   document.getElementById("logoutBtn").classList.remove("hidden");
-  currentTab=(TAB_DEFS[SESSION.role][0]||["before"])[0];buildTabs();renderWhoAmI();showTab(currentTab);}
+  currentTab=(TAB_DEFS[SESSION.role][0]||["before"])[0];buildTabs();renderWhoAmI();showTab(currentTab);
+}
 function doLogout(){SESSION=null;currentTab=null;
   document.getElementById("appView").classList.add("hidden");document.getElementById("loginView").classList.remove("hidden");
   document.getElementById("logoutBtn").classList.add("hidden");document.getElementById("whoami").classList.add("hidden");
-  document.getElementById("loginUser").value="";document.getElementById("loginPass").value="";}
+  document.getElementById("loginUser").value="";document.getElementById("loginPass").value="";
+  ["suName","suUser","suPass","suPass2"].forEach(x=>{const el=document.getElementById(x);if(el)el.value="";});
+  setAuthMode("login");}
+function setAuthMode(mode){
+  document.querySelectorAll(".authtab").forEach(b=>b.classList.toggle("on",b.dataset.mode===mode));
+  document.getElementById("loginPane").classList.toggle("hidden",mode!=="login");
+  document.getElementById("signupPane").classList.toggle("hidden",mode!=="signup");
+}
 
 /* ---------- wire ---------- */
 document.getElementById("themeToggle").addEventListener("click",()=>{
@@ -1680,6 +1744,9 @@ document.getElementById("langs").addEventListener("click",e=>{const b=e.target.c
   LANG=b.dataset.lang;document.querySelectorAll("#langs button").forEach(x=>x.classList.toggle("on",x===b));applyLang();});
 document.getElementById("loginBtn").addEventListener("click",doLogin);
 document.getElementById("loginPass").addEventListener("keydown",e=>{if(e.key==="Enter")doLogin();});
+document.getElementById("suBtn").addEventListener("click",doSignup);
+document.getElementById("suPass2").addEventListener("keydown",e=>{if(e.key==="Enter")doSignup();});
+document.getElementById("authTabs").addEventListener("click",e=>{const b=e.target.closest(".authtab");if(b)setAuthMode(b.dataset.mode);});
 document.getElementById("logoutBtn").addEventListener("click",doLogout);
 ["dArousal","dFocus"].forEach(id=>{const el=document.getElementById(id);el.addEventListener("input",()=>document.getElementById(id+"V").textContent=el.value);});
 document.getElementById("submitBrums").addEventListener("click",async()=>{const {scores,complete}=readBrums();if(!complete){toast(t("saveFirst"));return;}
@@ -1700,12 +1767,11 @@ document.getElementById("clearDiary").addEventListener("click",()=>{document.get
   document.getElementById("dFocus").value=5;document.getElementById("dFocusV").textContent="5";
   document.getElementById("dBest").value="";document.getElementById("dBroke").value="";document.getElementById("dFix").value="";document.getElementById("diaryFeedback").classList.add("hidden");toast(t("cleared"));});
 document.getElementById("exportAll").addEventListener("click",exportSquadCsv);
-document.getElementById("loadDemoData").addEventListener("click",loadDemoData);
-document.getElementById("loadDemoSelf").addEventListener("click",loadDemoSelf);
+/* demo-data buttons removed in the live build */
 document.getElementById("sortRoster").addEventListener("change",renderRoster);
 document.getElementById("newAccountBtn").addEventListener("click",openNewAccount);
 
-async function init(){if(CONFIGURED||DEMO_MODE)document.getElementById("configBanner").classList.add("hidden");await ensureSeed();applyLang();}
+async function init(){if(CONFIGURED)document.getElementById("configBanner").classList.add("hidden");await ensureSeed();applyLang();}
 init();
 </script>
 </body>
